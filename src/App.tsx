@@ -10,6 +10,13 @@ type User = {
   created_at: string;
 };
 
+type FakeAccount = {
+  email: string;
+  password: string;
+}[];
+
+let accounts: FakeAccount = [];
+
 function App() {
   return(
     <BrowserRouter>
@@ -28,9 +35,36 @@ function App() {
 function AuthLog() {
   const navigate = useNavigate();
   const [forgot, setForgot] = useState<boolean>(false);
+  const [queryEmail, setQueryEmail] = useState<string>("");
+  const [queryPass, setQueryPass] = useState<string>("");
+  const [dontExist, setDontExist] = useState<boolean>(false);
 
   function handleClick() {
     setForgot(!forgot);
+  }
+
+  function handleLogin() {
+    console.log("Entro");
+    let exist: boolean = false;
+    let isCorrectPass: boolean = false;
+
+    for (const account of accounts) {
+      if (account.email == queryEmail) {
+        exist = true;
+        if (account.password == queryPass) {
+          isCorrectPass = true;
+        }
+      }
+    }
+
+
+    if (!exist) {
+      setDontExist(true);
+    } else {
+      if (isCorrectPass) {
+        navigate("/dashboard");
+      }
+    }
   }
 
   if (forgot) {
@@ -38,7 +72,9 @@ function AuthLog() {
       <>
         <HeaderSide/>
         <div className="whole2">
-          <div className="authDiv1">
+          <div className="authDiv2">
+            <button className="passBack" onClick={() => setForgot(false)}> {`<`} </button>
+
             <div className="authContainer">
               <div className="auth">
                 <label className="startLabel">Recuperacion</label>
@@ -60,10 +96,11 @@ function AuthLog() {
             <div className="authContainer">
               <div className="auth">
                 <label className="startLabel">Inicia sesion en Expense tracker</label>
-                <input className="authLog" placeholder="Ingresa tu correo"/>
-                <input className="authLog" placeholder="Ingresa tu contraseña"/>
+                {dontExist && <label className="errorLabel"> Las credenciales son incorrectas o no existen </label>}
+                <input className={dontExist ? "authLog dont" : "authLog"} placeholder="Ingresa tu correo" value={queryEmail} onChange={(e) => setQueryEmail(e.target.value)}/>
+                <input className={dontExist ? "authLog dont" : "authLog"} placeholder="Ingresa tu contraseña" value={queryPass} onChange={(e) => setQueryPass(e.target.value)}/>
                 <label className="authLab" onClick={handleClick}>¿Olvidaste tu contraseña? Click aqui.</label>
-                <button className="authBut"> Iniciar sesión </button>
+                <button className="authBut" onClick={handleLogin}> Iniciar sesión </button>
                 <label className="authLab" onClick={() => navigate("/signup", {replace: true})}> ¿No tienes cuenta? Registrate aqui. </label>
               </div>
             </div>

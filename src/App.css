@@ -52,6 +52,8 @@ html, body {
 }
 
 .authDiv2 {
+    display: flex;
+    flex-direction: row;
     max-width: 400px;
     width: 100%;
     box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
@@ -60,6 +62,25 @@ html, body {
     flex-shrink: 0; 
     animation: signup_int 0.2s ease-out;
 }
+
+.passBack {
+    height: 20px;
+    max-width: 50px;
+    width: 100%;
+    border-radius: 10px;
+    margin: 10px;
+    border: 1px transparent;
+}
+
+.passBack:hover {
+    transform: scale(1.03);
+}
+
+.passBack:active {
+    transform: scale(1);
+}
+
+
 
 @keyframes login_int {
     from {
@@ -107,7 +128,6 @@ html, body {
 .authLab {
     padding: 10px;
     font-family: "Pliant", sans-serif;
-    font-style: grey;
     font-size: 12px;
     align-self: center;
 }
@@ -129,6 +149,29 @@ html, body {
     padding-left: 10px;
     border: 1px solid grey;
     outline: none;
+}
+
+.authLog.dont {
+    border: 1px solid red;
+}
+
+@keyframes errorL {
+    from {
+        opacity: 0;
+        transform: transformX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: transformX(0px);
+    }
+}
+
+.errorLabel {
+    color: red;
+    font-family: "Pliant", sans-serif;
+    font-size: 12px;
+    text-align: center;
+    animation: errorL 0.2s ease-out;
 }
 
 .authLog:hover {
