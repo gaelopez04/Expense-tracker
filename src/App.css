@@ -65,10 +65,12 @@ html, body {
 
 .passBack {
     height: 20px;
-    max-width: 50px;
+    max-width: 40px;
     width: 100%;
     border-radius: 10px;
-    margin: 10px;
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     border: 1px transparent;
 }
 
@@ -110,6 +112,17 @@ html, body {
     flex-direction: column;
     align-items: center;
 }
+
+.authContainer2 {
+    padding-top: 40px;
+    padding-bottom: 40px;
+    padding-right: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
 
 .auth {
     display: flex;
@@ -155,6 +168,10 @@ html, body {
     border: 1px solid red;
 }
 
+.authLog.exist {
+    border: 1px solid green;
+}
+
 @keyframes errorL {
     from {
         opacity: 0;
@@ -180,7 +197,7 @@ html, body {
 
 .authBut {
     height: 30px;
-    max-width: 400px;
+    max-width: 290px;
     width: 100%;
     border-radius: 10px;
     border: 1px transparent;
@@ -200,4 +217,13 @@ html, body {
     font-family: "Pliant", sans-serif;
     font-size: 16px;
     font-weight: 800;
+}
+
+.signLabb {
+    font-family: "Pliant", sans-serif;
+    font-size: 14px;
+    text-align: justify;
+    padding-left: 10px;
+    padding-bottom: 10px;
+    padding-right: 10px;
 }
