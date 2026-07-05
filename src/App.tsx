@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link, BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
 import './App.css'
 
 type User = {
@@ -22,6 +23,10 @@ type emailProp = {
 
 type hideProp = {
   onHide: () => void
+}
+
+type statusHideProp = {
+  hideStatus: boolean
 }
 
 function App() {
@@ -73,6 +78,7 @@ function AuthLog({testEmail}: emailProp) {
       }
 
       if (exist && isCorrectPass) {
+        localStorage.setItem("user", queryEmail);
         setExist(true);
         navigate("/dashboard");
       } else {
@@ -184,6 +190,14 @@ function AuthSign({testEmail}: emailProp) {
 }
 
 function Dashboard() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (!user) {
+      navigate("/login");
+    }
+  }, []);
 
   return(
     <div className="wholeDash">
@@ -213,6 +227,8 @@ function SideBar() {
       
       <aside className={hideClicked ? "sideBar hide" : "sideBar"}>
         <HeaderSideDash onHide={handleClick}/>
+        <OptionsSideDash/>
+        <BottomSideDash hideStatus={hideClicked}/>
       </aside>
     </>
   );
@@ -224,6 +240,39 @@ function HeaderSideDash({onHide}: hideProp) {
       <label className="titleSide"> ET </label>
       <img className="hideSide" src="public\hide_sidebar_icon.png" onClick={onHide}/>
     </div>
+  );
+}
+
+function OptionsSideDash() {
+  return(
+    <div className="OptionSide">
+      <label></label>
+      <label></label>
+      <label></label>
+    </div>
+  );
+}
+
+function BottomSideDash({hideStatus}: statusHideProp) {
+  const navigate = useNavigate();
+
+  function handleClick() {
+    localStorage.removeItem("user");
+    navigate("/login");
+  }
+  return(
+    <>
+      <div className="bottomSide">
+        <img className="userIcon" src="public\user_icon.png"/>
+        <img className={hideStatus ? "darkTheme hide" : "darkTheme"} src="public\darkmode.png"/>
+        <img className="hideSide1" src="public\log_out_icon.png" onClick={handleClick}/>
+      </div>
+      {hideStatus && <div className="hideDarkTheme"> 
+        <img className="darkThemeHide" src="public\darkmode.png"/> 
+        <img className="userIconHide" src="public\user_icon.png"/>
+      </div>}
+    </>
+    
   );
 }
 

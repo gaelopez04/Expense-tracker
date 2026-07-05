@@ -239,7 +239,16 @@ html, body {
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
 }
 
+.bottomSide {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+    margin-top: auto;
+}
+
 .sideBar {
+    display: flex;
+    flex-direction: column;
     border: 1px solid transparent;
     box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
     max-width: 250px;
@@ -286,8 +295,78 @@ html, body {
     transform: scale(1);
 }
 
+
+.hideSide1 {
+    width: 33px;
+    margin-left: 10px;
+}
+
+.hideSide1:hover, .userIcon:hover, .darkThemeHide:hover, .userIconHide:hover {
+    transform: scale(1.04);
+}
+
+.hideSide1:active, .userIcon:active, .darkThemeHide:active, .userIconHide:active {
+    transform: scale(1);
+}
+
 .titleSide {
     font-family: "Pliant", sans-serif;
     font-size: 25px;
     font-weight: bold;
 }
+
+.darkTheme {
+    width: 40px; 
+    opacity: 1;
+    margin-left: auto;
+}
+
+.userIcon {
+    padding-top: 2px;
+    width: 35px;
+    height: 35px;
+}
+
+.darkTheme.hide {
+    animation: beg2 0.3s forwards;
+}
+
+@keyframes beg2 {
+    from {
+        transform: translateX(0px);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-300px);
+    }
+}
+
+.darkTheme:hover {
+    transform: scale(1.05);
+}
+
+.darkTheme:active {
+    transform: scale(1);
+}
+
+.hideDarkTheme {
+    display: flex;
+    flex-direction: column;
+}
+.darkThemeHide, .userIconHide {
+    padding-bottom: 10px;
+    padding-right: 10px;
+    padding-left: 12px;
+    width: 40px; 
+    margin-left: auto;
+    animation: beg 0.6s ease-out;
+}
+
+@keyframes beg {
+    from {
+        transform: translateY(100px);
+    }
+    to {
+        transform: translateY(0px);
+    }
+} 
