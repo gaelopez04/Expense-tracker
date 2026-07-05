@@ -20,6 +20,10 @@ type emailProp = {
   testEmail: (email: string) => boolean
 }
 
+type hideProp = {
+  onHide: () => void
+}
+
 function App() {
 
   function verifyEmail(email: string): boolean {
@@ -111,7 +115,7 @@ function AuthLog({testEmail}: emailProp) {
                 <label className="startLabel">Inicia sesion en Expense tracker</label>
                 {dontExist && <label className="errorLabel"> Las credenciales son incorrectas o no existen </label>}
                 <input className={dontExist ? "authLog dont" : exist ? "authLog exist" : "authLog"} placeholder="Ingresa tu correo" value={queryEmail} onChange={(e) => setQueryEmail(e.target.value)}/>
-                <input className={dontExist ? "authLog dont" : exist ? "authLog exist" : "authLog"} placeholder="Ingresa tu contraseña" value={queryPass} onChange={(e) => setQueryPass(e.target.value)}/>
+                <input className={dontExist ? "authLog dont" : exist ? "authLog exist" : "authLog"} placeholder="Ingresa tu contraseña" value={queryPass} onChange={(e) => setQueryPass(e.target.value)} type="password"/>
                 <label className="authLab" onClick={handleClick}>¿Olvidaste tu contraseña? Click aqui.</label>
                 <button className="authBut" onClick={handleLogin}> Iniciar sesión </button>
                 <label className="authLab" onClick={() => navigate("/signup", {replace: true})}> ¿No tienes cuenta? Registrate aqui. </label>
@@ -139,6 +143,10 @@ function AuthSign({testEmail}: emailProp) {
     console.log(queryEmail);
     if (!testEmail(queryEmail) || !parsingPassword(queryPass) || !testName(queryName)) {
       setValid(false);
+    } else {
+      createUser(queryName, queryEmail, queryPass);
+      console.log("Account created:");
+      console.log(accounts[accounts.length - 1]);
     }
   }
 
@@ -161,7 +169,7 @@ function AuthSign({testEmail}: emailProp) {
 
               <label className="signLab">Ingresa tu contraseña</label>
               {!valid && <label className="errorLabel"> Debe ser una contraseña igual o mayor a 8 caracteres y al menos una mayuscula</label>}
-              <input className={parsingPassword(queryPass) ? "authLog exist" : "authLog"} placeholder="Ingresa tu contraseña" value={queryPass} onChange={(e) => setQueryPass(e.target.value)}/>
+              <input className={parsingPassword(queryPass) ? "authLog exist" : "authLog"} placeholder="Ingresa tu contraseña" value={queryPass} onChange={(e) => setQueryPass(e.target.value)} type="password"/>
 
               <button className="authBut" onClick={handleSignup}> Registrarse </button>
 
@@ -178,7 +186,8 @@ function AuthSign({testEmail}: emailProp) {
 function Dashboard() {
 
   return(
-    <div>
+    <div className="wholeDash">
+      <SideBar/>
     </div>
   );
 }
@@ -189,6 +198,31 @@ function HeaderSide() {
     <div className="header">
       <img className="themeH" src="public\darkmode.png"/>
       <label className="nameLogoH"> EXPENSE TRACKER </label>
+    </div>
+  );
+}
+
+function SideBar() {
+  const [hideClicked, setHideClicked] = useState<boolean>(false);
+
+  function handleClick() {
+    setHideClicked(!hideClicked);
+  }
+  return(
+    <>
+      
+      <aside className={hideClicked ? "sideBar hide" : "sideBar"}>
+        <HeaderSideDash onHide={handleClick}/>
+      </aside>
+    </>
+  );
+}
+
+function HeaderSideDash({onHide}: hideProp) {
+  return(
+    <div className="headerSide">
+      <label className="titleSide"> ET </label>
+      <img className="hideSide" src="public\hide_sidebar_icon.png" onClick={onHide}/>
     </div>
   );
 }
@@ -211,6 +245,21 @@ function testName(name: string): boolean {
    }
 
    return false;
+}
+
+
+//CRUD functions
+function createUser(nameUser: string, emailUser: string, passwordUser: string) {
+  const user: User = {id: Date.now(), name: nameUser, email: emailUser, password: passwordUser, created_at: new Date().toISOString()};
+  accounts.push(user);
+}
+
+function deleteUser(idUser: number) {
+
+}
+
+function modifyUser(idUser: number, kind: string) {
+
 }
 
 export default App

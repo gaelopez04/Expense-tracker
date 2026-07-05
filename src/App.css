@@ -1,6 +1,6 @@
 html, body {
     font-family: "Pliant", sans-serif;
-    height: 100px;
+    margin: 0;
 }
 .whole {
     display: flex;
@@ -10,6 +10,7 @@ html, body {
 .header {
     display: flex;
     flex-direction: row;
+    padding: 7px;
 }
 
 .nameLogoH {
@@ -226,4 +227,67 @@ html, body {
     padding-left: 10px;
     padding-bottom: 10px;
     padding-right: 10px;
+}
+
+.wholeDash {
+    margin: 0;
+}
+
+.headerSide {
+    display: flex;
+    padding: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.sideBar {
+    border: 1px solid transparent;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
+    max-width: 250px;
+    width: 100%;
+    padding: 0;
+    min-height: 100vh;
+    animation: hiding_out 0.4s forwards;
+}
+
+.sideBar.hide {
+    animation: hiding_in 0.4s forwards;
+}
+
+
+@keyframes hiding_in {
+    from {
+        transform: translateX(0px);
+    }
+    to {
+        transform: translateX(-200px);
+    }
+}
+
+@keyframes hiding_out {
+    from {
+        opacity: 1;
+        transform: translateX(-250px);
+    }
+    to {
+        transform: translateX(0px);
+    }
+}
+
+.hideSide {
+    width: 33px;
+    margin-left: auto;
+}
+
+.hideSide:hover {
+    transform: scale(1.04);
+}
+
+.hideSide:active {
+    transform: scale(1);
+}
+
+.titleSide {
+    font-family: "Pliant", sans-serif;
+    font-size: 25px;
+    font-weight: bold;
 }
