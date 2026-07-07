@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link, BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useNavigate, BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useEffect } from 'react'
 import './App.css'
 
@@ -189,6 +189,16 @@ function AuthSign({testEmail}: emailProp) {
   );
 }
 
+function HeaderSide() {
+  
+  return(
+    <div className="header">
+      <img className="themeH" src="public\darkmode.png"/>
+      <label className="nameLogoH"> EXPENSE TRACKER </label>
+    </div>
+  );
+}
+
 function Dashboard() {
   const navigate = useNavigate();
 
@@ -200,18 +210,23 @@ function Dashboard() {
   }, []);
 
   return(
-    <div className="wholeDash">
+    <div className="wholeDash1">
       <SideBar/>
+      <div className="wholeDashRight">
+        <HeaderDash/>
+      </div>
+      
     </div>
   );
 }
 
-function HeaderSide() {
+function HeaderDash() {
+  const user = localStorage.getItem("user");
+  const name: string = getNameUserByEmail(user ?? "");
   
   return(
-    <div className="header">
-      <img className="themeH" src="public\darkmode.png"/>
-      <label className="nameLogoH"> EXPENSE TRACKER </label>
+    <div className="headerDash">
+      <label className="greeting"> Bienvenido, {name} </label>
     </div>
   );
 }
@@ -226,7 +241,7 @@ function SideBar() {
     <>
       
       <aside className={hideClicked ? "sideBar hide" : "sideBar"}>
-        <HeaderSideDash onHide={handleClick}/>
+        <HeaderSideBar onHide={handleClick}/>
         <OptionsSideDash/>
         <BottomSideDash hideStatus={hideClicked}/>
       </aside>
@@ -234,7 +249,7 @@ function SideBar() {
   );
 }
 
-function HeaderSideDash({onHide}: hideProp) {
+function HeaderSideBar({onHide}: hideProp) {
   return(
     <div className="headerSide">
       <label className="titleSide"> ET </label>
@@ -244,8 +259,9 @@ function HeaderSideDash({onHide}: hideProp) {
 }
 
 function OptionsSideDash() {
+
   return(
-    <div className="OptionSide">
+    <div className="optionSide">
       <label></label>
       <label></label>
       <label></label>
@@ -255,6 +271,11 @@ function OptionsSideDash() {
 
 function BottomSideDash({hideStatus}: statusHideProp) {
   const navigate = useNavigate();
+  const [clicked, setClicked] = useState<boolean>(false);
+
+  function handleClickIcon() {
+    setClicked(!clicked);
+  }
 
   function handleClick() {
     localStorage.removeItem("user");
@@ -263,12 +284,14 @@ function BottomSideDash({hideStatus}: statusHideProp) {
   return(
     <>
       <div className="bottomSide">
-        <img className="userIcon" src="public\user_icon.png"/>
+        {clicked && !hideStatus && <div className="popover">
+          <label> Simon we</label>
+        </div>}
+        <img className="userIcon" src="public\user_icon.png" onClick={handleClickIcon} />
         <img className={hideStatus ? "darkTheme hide" : "darkTheme"} src="public\darkmode.png"/>
         <img className="hideSide1" src="public\log_out_icon.png" onClick={handleClick}/>
       </div>
       {hideStatus && <div className="hideDarkTheme"> 
-        <img className="darkThemeHide" src="public\darkmode.png"/> 
         <img className="userIconHide" src="public\user_icon.png"/>
       </div>}
     </>
@@ -303,12 +326,15 @@ function createUser(nameUser: string, emailUser: string, passwordUser: string) {
   accounts.push(user);
 }
 
-function deleteUser(idUser: number) {
+function getNameUserByEmail(email: string): string {
 
-}
+  for (const account of accounts) {
+    if (email == account.email) {
+      return account.name;
+    }
+  }
 
-function modifyUser(idUser: number, kind: string) {
-
+  return "Not found";
 }
 
 export default App
