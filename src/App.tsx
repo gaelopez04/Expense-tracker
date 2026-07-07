@@ -26,7 +26,12 @@ type hideProp = {
 }
 
 type statusHideProp = {
-  hideStatus: boolean
+  hideStatus: boolean,
+  onProfile: () => void
+}
+
+type profileProp = {
+  onProfile: () => void
 }
 
 function App() {
@@ -42,7 +47,6 @@ function App() {
         <Route path="/login" element={ <AuthLog testEmail={verifyEmail}/> }/>
         <Route path="/signup" element={ <AuthSign testEmail={verifyEmail}/> }/>
         <Route path="/dashboard" element={ <Dashboard/> }/>
-        <Route path="/profile" element={<Profile/>}/>
       </Routes>
     </BrowserRouter>
   );
@@ -201,6 +205,7 @@ function HeaderSide() {
 }
 
 function Dashboard() {
+  const [profile, setProfile] = useState<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -210,13 +215,49 @@ function Dashboard() {
     }
   }, []);
 
+  function handleProfile() {
+    setProfile(!profile);
+    console.log(profile);
+  }
+
   return(
     <div className="wholeDash1">
-      <SideBar/>
-      <div className="wholeDashRight">
-        <HeaderDash/>
+      <SideBar onProfile={handleProfile}/>
+      <div className="wholeDash">
+        <div className="wholeDashTop">
+          <HeaderDash/>
+        </div>
+
+          <div className="wholeDashMedium">
+            {profile && <div className="profileContainer">
+              <div className="profile">
+                <img src="public\user_icon.png" className="profileUser"/>
+                <label className="profileName"> Nombresdsssssssssssssssssssss </label>
+                <img src="public\log_out_icon.png" className="profileLogout"/>
+              </div>
+
+              <div className="profileDatos">
+                <label> Datos generales </label>
+                
+                <label> ID de usuario </label>
+                <label> ID </label>
+
+                <label> Nombre completo</label>
+                <input/>
+
+                <label> Correo </label>
+                <label> Correo </label>
+                
+                <label> Contrasenia </label>
+                <input/>
+
+                <label> Creado en </label>
+                <label> fecha </label>
+              </div>
+            </div>}
+        
+          </div>  
       </div>
-      
     </div>
   );
 }
@@ -232,19 +273,20 @@ function HeaderDash() {
   );
 }
 
-function SideBar() {
+function SideBar({onProfile}: profileProp) {
   const [hideClicked, setHideClicked] = useState<boolean>(false);
 
   function handleClick() {
     setHideClicked(!hideClicked);
   }
+
   return(
     <>
       
       <aside className={hideClicked ? "sideBar hide" : "sideBar"}>
         <HeaderSideBar onHide={handleClick}/>
         <OptionsSideDash/>
-        <BottomSideDash hideStatus={hideClicked}/>
+        <BottomSideDash hideStatus={hideClicked} onProfile={onProfile}/>
       </aside>
     </>
   );
@@ -270,7 +312,7 @@ function OptionsSideDash() {
   );
 }
 
-function BottomSideDash({hideStatus}: statusHideProp) {
+function BottomSideDash({hideStatus, onProfile}: statusHideProp) {
   const navigate = useNavigate();
   const [clicked, setClicked] = useState<boolean>(false);
 
@@ -283,21 +325,21 @@ function BottomSideDash({hideStatus}: statusHideProp) {
     navigate("/login");
   }
 
-  
   return(
     <>
       <div className="bottomSide">
         {clicked && !hideStatus && <div className="popover">
-          <div className="optionpop"  onClick={() => navigate("/profile")}>
+          <div className="optionpop" onClick={onProfile}>
             <label className="labelpop"> Perfil </label>
             <img className="userpop" src="public\user_icon.png"/>
-          </div>
+            </div>
 
           <div className="optionpop">
             <label className="labelpop"> Cerrar sesión </label>
             <img className="logpop" src="public\log_out_icon.png"/>
           </div>
-        </div>}
+        </div>}          
+
         <img className="userIcon" src="public\user_icon.png" onClick={handleClickIcon} />
         <img className={hideStatus ? "darkTheme hide" : "darkTheme"} src="public\darkmode.png"/>
         <img className="hideSide1" src="public\log_out_icon.png" onClick={handleClick}/>
@@ -307,14 +349,6 @@ function BottomSideDash({hideStatus}: statusHideProp) {
       </div>}
     </>
     
-  );
-}
-
-function Profile() {
-  return(
-    <div>
-      <label> Hola we</label>
-    </div>
   );
 }
 
