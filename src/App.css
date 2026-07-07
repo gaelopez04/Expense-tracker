@@ -425,6 +425,12 @@ html, body {
     flex-direction: column;
 }
 
+.labelpop {
+    font-family: "Pliant", sans-serif;
+    font-size: 14px;
+    padding: 3px;
+}
+
 .popover {
   position: absolute;
   bottom: 70px;        
@@ -432,9 +438,29 @@ html, body {
   width: 200px;
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  padding: 12px;
+  padding: 10px;
   z-index: 100; 
   animation: pos_initial 0.3s ease-out; 
+  display: flex;
+  flex-direction: column;
+}
+
+.optionpop {
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+    border: 1px transparent;
+    margin: 0;
+    padding: 1px;
+
+}
+
+.optionpop:hover {
+    background-color: rgb(241, 241, 241);
+}
+
+.optionpop:active {
+    transform: scale(0.99);
 }
 
 @keyframes pos_initial {
@@ -446,4 +472,10 @@ html, body {
         opacity: 1;
         transform: translateY(0px);
     }
+}
+
+.logpop, .userpop {
+    width: 20px;
+    height: 20px;
+    margin-left: auto;
 }

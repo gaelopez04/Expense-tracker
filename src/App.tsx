@@ -42,6 +42,7 @@ function App() {
         <Route path="/login" element={ <AuthLog testEmail={verifyEmail}/> }/>
         <Route path="/signup" element={ <AuthSign testEmail={verifyEmail}/> }/>
         <Route path="/dashboard" element={ <Dashboard/> }/>
+        <Route path="/profile" element={<Profile/>}/>
       </Routes>
     </BrowserRouter>
   );
@@ -281,11 +282,21 @@ function BottomSideDash({hideStatus}: statusHideProp) {
     localStorage.removeItem("user");
     navigate("/login");
   }
+
+  
   return(
     <>
       <div className="bottomSide">
         {clicked && !hideStatus && <div className="popover">
-          <label> Simon we</label>
+          <div className="optionpop"  onClick={() => navigate("/profile")}>
+            <label className="labelpop"> Perfil </label>
+            <img className="userpop" src="public\user_icon.png"/>
+          </div>
+
+          <div className="optionpop">
+            <label className="labelpop"> Cerrar sesión </label>
+            <img className="logpop" src="public\log_out_icon.png"/>
+          </div>
         </div>}
         <img className="userIcon" src="public\user_icon.png" onClick={handleClickIcon} />
         <img className={hideStatus ? "darkTheme hide" : "darkTheme"} src="public\darkmode.png"/>
@@ -296,6 +307,14 @@ function BottomSideDash({hideStatus}: statusHideProp) {
       </div>}
     </>
     
+  );
+}
+
+function Profile() {
+  return(
+    <div>
+      <label> Hola we</label>
+    </div>
   );
 }
 
