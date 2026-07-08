@@ -13,7 +13,7 @@ type User = {
 
 let accounts: User[] = [];
 
-accounts.push({id: Date.now(), name: "Gael Lopez", email: "gael.lopez@prueba.com", password: "simonwe", created_at: new Date().toISOString()});
+accounts.push({id: 1, name: "Gael Lopez", email: "gael.lopez@prueba.com", password: "simonwe", created_at: new Date().toISOString()});
 
 console.log(accounts[0]);
 
@@ -68,9 +68,9 @@ function AuthLog({testEmail}: emailProp) {
   }
 
   function handleLogin() {
-    console.log("Entro");
     let exist: boolean = false;
     let isCorrectPass: boolean = false;
+    let id: number = 0;
 
     if (testEmail(queryEmail)) {
       for (const account of accounts) {
@@ -78,12 +78,13 @@ function AuthLog({testEmail}: emailProp) {
           exist = true;
           if (account.password == queryPass) {
             isCorrectPass = true;
+            id = account.id;
           }
         }
       }
 
       if (exist && isCorrectPass) {
-        localStorage.setItem("user", queryEmail);
+        localStorage.setItem("user", String(id));
         setExist(true);
         navigate("/dashboard");
       } else {
@@ -151,7 +152,6 @@ function AuthSign({testEmail}: emailProp) {
 
 
   function handleSignup() {
-    console.log(queryEmail);
     if (!testEmail(queryEmail) || !parsingPassword(queryPass) || !testName(queryName)) {
       setValid(false);
     } else {
@@ -206,18 +206,33 @@ function HeaderSide() {
 
 function Dashboard() {
   const [profile, setProfile] = useState<boolean>(false);
+  const [userTemp, setUserTemp] = useState<User>({id: -1, name: "No encontrado", email: "No encontrado", password: "No encontrado", created_at: "No encontrado"});
   const navigate = useNavigate();
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (!user) {
+    const id = localStorage.getItem("user");
+    if (!id) {
       navigate("/login");
+    } else {
+      const found = getUserByID(Number(id));
+      if (found) setUserTemp(found);
     }
   }, []);
 
   function handleProfile() {
     setProfile(!profile);
     console.log(profile);
+
+    if (!profile) {
+      console.log("ENTRO!!!!!!");
+      const id = localStorage.getItem('user');
+      console.log(id);
+      const found = getUserByID(Number(id));
+      console.log(found);
+      if (found) {
+        setUserTemp(found);
+      }
+    }
   }
 
   return(
@@ -232,27 +247,39 @@ function Dashboard() {
             {profile && <div className="profileContainer">
               <div className="profile">
                 <img src="public\user_icon.png" className="profileUser"/>
-                <label className="profileName"> Nombresdsssssssssssssssssssss </label>
-                <img src="public\log_out_icon.png" className="profileLogout"/>
+                <label className="profileName"> {userTemp.name} </label>
               </div>
 
               <div className="profileDatos">
-                <label> Datos generales </label>
+                <label id="titleProfile"> Datos generales </label>
                 
-                <label> ID de usuario </label>
-                <label> ID </label>
+                <label className="signLab1"> ID de usuario </label>
+                <input disabled placeholder={String(userTemp.id)} className="infoProfile"/>
 
-                <label> Nombre completo</label>
-                <input/>
-
-                <label> Correo </label>
-                <label> Correo </label>
+                <label className="signLab1"> Nombre completo</label>
+                <div className="IBContainer">
+                  <input disabled placeholder={userTemp.name} className="infoProfile"/>
+                  <button className="buttonEdit"> Edit </button>
+                </div>
                 
-                <label> Contrasenia </label>
-                <input/>
 
-                <label> Creado en </label>
-                <label> fecha </label>
+                <label className="signLab1"> Correo </label>
+                <input disabled placeholder={userTemp.email} className="infoProfile"/>
+                
+                <label className="signLab1"> Contraseña </label>
+                <div className="IBContainer">
+                  <input disabled value={userTemp.password} className="infoProfile" type="password"/>
+                  <button className="buttonEdit"> Edit </button>
+                </div>
+                
+
+                <label className="signLab1"> Creado en </label>
+                <input disabled placeholder={userTemp.created_at} className="infoProfile"/>
+              </div>
+
+              <div className="canGuar">
+                <button className="buttonCanGuar"> Cancelar </button>
+                <button className="buttonCanGuar"> Guardar </button>
               </div>
             </div>}
         
@@ -264,7 +291,12 @@ function Dashboard() {
 
 function HeaderDash() {
   const user = localStorage.getItem("user");
-  const name: string = getNameUserByEmail(user ?? "");
+  const account: User | null = getUserByID(Number(user));
+  let name: string = "desconocido";
+
+  if (account != null) {
+    name = account.name;
+  }
   
   return(
     <div className="headerDash">
@@ -379,15 +411,15 @@ function createUser(nameUser: string, emailUser: string, passwordUser: string) {
   accounts.push(user);
 }
 
-function getNameUserByEmail(email: string): string {
+function getUserByID(id: number): User | null {
 
   for (const account of accounts) {
-    if (email == account.email) {
-      return account.name;
+    if (id == account.id) {
+      return account;
     }
   }
 
-  return "Not found";
+  return null;
 }
 
 export default App
