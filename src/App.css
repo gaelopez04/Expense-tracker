@@ -176,6 +176,14 @@ html, body {
     outline: none;
 }
 
+.authLogPass {
+    border-radius: 10px;
+    height: 30px;
+    border: 1px solid grey;
+    outline: none;
+    padding-left: 10px;
+}
+
 
 .authLog.dont {
     border: 1px solid red;
@@ -198,6 +206,14 @@ html, body {
 
 .errorLabel {
     color: red;
+    font-family: "Pliant", sans-serif;
+    font-size: 12px;
+    text-align: center;
+    animation: errorL 0.2s ease-out;
+}
+
+.sucLabel {
+    color: green;
     font-family: "Pliant", sans-serif;
     font-size: 12px;
     text-align: center;
@@ -230,6 +246,14 @@ html, body {
     font-family: "Pliant", sans-serif;
     font-size: 16px;
     font-weight: 800;
+}
+
+.signLabPass {
+    font-family: "Pliant", sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 10px;
 }
 
 .signLabb {
@@ -509,7 +533,24 @@ html, body {
     left: 50%;
     max-width: 500px;
     width: 100%;
-    animation: profile_init 0.6s forwards;
+    animation: profile_init 0.4s forwards;
+}
+
+.popoverPass {
+    position: absolute;
+    box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.3);
+    border-radius: 10px; 
+    background-color: white;
+    top: 50%;
+    left: 50%;
+    z-index: 100;
+    transform: translate(-50%, -50%);
+}
+
+.popPassContainer {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
 }
 
 .profile {
@@ -556,7 +597,10 @@ html, body {
     border: 1px transparent;
     outline: none;
     width: 100%;
+    padding-right: 10px;
 }
+
+
 
 .IBContainer {
     display: flex;
@@ -586,4 +630,10 @@ html, body {
     height: 25px;
     max-width: 80px;
     width: 100%;
+    height: 30px;
+}
+
+.inputContraContainer {
+    display: flex;
+    flex-direction: row;
 }

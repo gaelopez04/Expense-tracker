@@ -149,15 +149,20 @@ function AuthSign({testEmail}: emailProp) {
   const [queryName, setQueryName] = useState<string>("");
 
   const [valid, setValid] = useState<boolean>(true);
+  const [created, setCreated] = useState<boolean>(false);
 
 
   function handleSignup() {
     if (!testEmail(queryEmail) || !parsingPassword(queryPass) || !testName(queryName)) {
       setValid(false);
+      setCreated(false);
     } else {
       createUser(queryName, queryEmail, queryPass);
       console.log("Account created:");
       console.log(accounts[accounts.length - 1]);
+      navigate("/login");
+      setValid(true);
+      setCreated(true);
     }
   }
 
@@ -171,6 +176,7 @@ function AuthSign({testEmail}: emailProp) {
               <label className="startLabel">Registrate en Expense Tracker</label>
               
               <label className="signLab">Ingresa tu nombre completo</label>
+              {created && <label className="sucLabel"> Cuenta creada satisfactoriamente </label>}
               {!valid && <label className="errorLabel"> Debe ser un nombre valido</label>}
               <input className={testName(queryName) ? "authLog exist" : "authLog"} placeholder="Ingresa tu nombre completo" value={queryName} onChange={(e) => setQueryName(e.target.value)}/>
 
@@ -207,6 +213,8 @@ function HeaderSide() {
 function Dashboard() {
   const [profile, setProfile] = useState<boolean>(false);
   const [userTemp, setUserTemp] = useState<User>({id: -1, name: "No encontrado", email: "No encontrado", password: "No encontrado", created_at: "No encontrado"});
+  const [passwordChang, setPasswordChang] = useState<boolean>(false);
+  const [passwordCor, setPasswordCor] = useState<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -233,6 +241,16 @@ function Dashboard() {
         setUserTemp(found);
       }
     }
+  }
+
+  function handleChangingPassword() {
+    const id = localStorage.getItem("user");
+    console.log("Entro en changing");
+    setPasswordChang(true);
+  }
+
+  function handleRegresar() {
+    setPasswordChang(false);    
   }
 
   return(
@@ -269,7 +287,7 @@ function Dashboard() {
                 <label className="signLab1"> Contraseña </label>
                 <div className="IBContainer">
                   <input disabled value={userTemp.password} className="infoProfile" type="password"/>
-                  <button className="buttonEdit"> Edit </button>
+                  <button className="buttonEdit" onClick={handleChangingPassword}> Edit </button>
                 </div>
                 
 
@@ -282,7 +300,18 @@ function Dashboard() {
                 <button className="buttonCanGuar"> Guardar </button>
               </div>
             </div>}
-        
+
+            {passwordChang && <div className="popoverPass">
+              <div className="popPassContainer">
+                <label className="signLabPass"> Ingresa tu contraseña </label>
+                <div className="inputContraContainer">
+                  <input placeholder="Ingresa tu contraseña" className="authLogPass"/>
+                  <button className="buttonCanGuar" onClick={handleRegresar}> Regresar </button>
+                </div>
+                
+              </div>
+            </div>}
+            
           </div>  
       </div>
     </div>
@@ -421,5 +450,14 @@ function getUserByID(id: number): User | null {
 
   return null;
 }
+
+// function passwordCorrect(id: number): boolean {
+
+//   for (const account of accounts) {
+//     if (account.id == id) {
+//       return account.password;
+//     }
+//   }
+// }
 
 export default App
