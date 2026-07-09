@@ -34,6 +34,18 @@ type profileProp = {
   onProfile: () => void
 }
 
+type popOverProp = {
+  profile: boolean,
+  disabled: boolean,
+  passwordChang: boolean,
+  handleChangingPassword: () => void,
+  handleConfiContra: () => void,
+  handleRegresar: () => void,
+  query: string,
+  setQuery: (value: string) => void
+  userTemp: User
+}
+
 function App() {
 
   function verifyEmail(email: string): boolean {
@@ -210,11 +222,14 @@ function HeaderSide() {
   );
 }
 
+
+//DASHBOARD============================================================================================================
 function Dashboard() {
   const [profile, setProfile] = useState<boolean>(false);
   const [userTemp, setUserTemp] = useState<User>({id: -1, name: "No encontrado", email: "No encontrado", password: "No encontrado", created_at: "No encontrado"});
+  const [query, setQuery] = useState<string>("");
+  const [disabled, setDisabled] = useState<boolean>(true);
   const [passwordChang, setPasswordChang] = useState<boolean>(false);
-  const [passwordCor, setPasswordCor] = useState<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -240,18 +255,31 @@ function Dashboard() {
       if (found) {
         setUserTemp(found);
       }
+    } else {
+      setDisabled(true);
+      setPasswordChang(false);
     }
   }
 
   function handleChangingPassword() {
     const id = localStorage.getItem("user");
     console.log("Entro en changing");
-    setPasswordChang(true);
+    setPasswordChang(!passwordChang);
+  }
+
+  function handleConfiContra() {
+    const id = localStorage.getItem("user");
+    if (isPasswordCorrect(Number(id), query)) {
+      setDisabled(false);
+      setPasswordChang(false);
+      setQuery("");  
+    }
   }
 
   function handleRegresar() {
-    setPasswordChang(false);    
+    setPasswordChang(false);  
   }
+
 
   return(
     <div className="wholeDash1">
@@ -262,7 +290,37 @@ function Dashboard() {
         </div>
 
           <div className="wholeDashMedium">
-            {profile && <div className="profileContainer">
+            <ProfilePopOver profile={profile} disabled={disabled} passwordChang={passwordChang} 
+            handleRegresar={handleRegresar} handleChangingPassword={handleChangingPassword} 
+            handleConfiContra={handleConfiContra} query={query} setQuery={setQuery} userTemp={userTemp}/>
+          </div>  
+      </div>
+    </div>
+  );
+}
+
+function HeaderDash() {
+  const user = localStorage.getItem("user");
+  const account: User | null = getUserByID(Number(user));
+  let name: string = "desconocido";
+
+  if (account != null) {
+    name = account.name;
+  }
+  
+  return(
+    <div className="headerDash">
+      <label className="greeting"> Bienvenido, {name} </label>
+    </div>
+  );
+}
+
+function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handleChangingPassword, handleConfiContra, query, setQuery, userTemp}: popOverProp) {
+  const [queryPass, setQueryPass] = useState<string>("");
+
+  return(
+    <>
+      {profile && <div className="profileContainer">
               <div className="profile">
                 <img src="public\user_icon.png" className="profileUser"/>
                 <label className="profileName"> {userTemp.name} </label>
@@ -286,7 +344,7 @@ function Dashboard() {
                 
                 <label className="signLab1"> Contraseña </label>
                 <div className="IBContainer">
-                  <input disabled value={userTemp.password} className="infoProfile" type="password"/>
+                  <input disabled={disabled} value={disabled ? userTemp.password : queryPass} className={!disabled ? "infoProfile dis" : "infoProfile"} type="password" onChange={(e) => setQueryPass(e.target.value)}/>
                   <button className="buttonEdit" onClick={handleChangingPassword}> Edit </button>
                 </div>
                 
@@ -305,35 +363,20 @@ function Dashboard() {
               <div className="popPassContainer">
                 <label className="signLabPass"> Ingresa tu contraseña </label>
                 <div className="inputContraContainer">
-                  <input placeholder="Ingresa tu contraseña" className="authLogPass"/>
+                  <input placeholder="Ingresa tu contraseña" className="authLogPass" value={query} onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={e =>{
+                    if (e.key === "Enter") handleConfiContra();
+                  }}/>
                   <button className="buttonCanGuar" onClick={handleRegresar}> Regresar </button>
                 </div>
                 
               </div>
             </div>}
-            
-          </div>  
-      </div>
-    </div>
+    </>
   );
 }
 
-function HeaderDash() {
-  const user = localStorage.getItem("user");
-  const account: User | null = getUserByID(Number(user));
-  let name: string = "desconocido";
-
-  if (account != null) {
-    name = account.name;
-  }
-  
-  return(
-    <div className="headerDash">
-      <label className="greeting"> Bienvenido, {name} </label>
-    </div>
-  );
-}
-
+//SIDEBAR===========================================================================================
 function SideBar({onProfile}: profileProp) {
   const [hideClicked, setHideClicked] = useState<boolean>(false);
 
@@ -451,13 +494,17 @@ function getUserByID(id: number): User | null {
   return null;
 }
 
-// function passwordCorrect(id: number): boolean {
+function isPasswordCorrect(id: number, password: string): boolean {
 
-//   for (const account of accounts) {
-//     if (account.id == id) {
-//       return account.password;
-//     }
-//   }
-// }
+  for (const account of accounts) {
+    if (account.id == id) {
+      if (account.password == password) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
 
 export default App
