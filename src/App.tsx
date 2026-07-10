@@ -50,7 +50,9 @@ type popOverProp = {
   disabledName: boolean,
   handleProfile: () => void,
   success: string,
-  setSuccess: (value: string) => void
+  setSuccess: (value: string) => void,
+  errorPass: boolean,
+  setErrorPass: (value: boolean) => void
 }
 
 function App() {
@@ -240,6 +242,7 @@ function Dashboard() {
   const [typeEdit, setTypeEdit] = useState<string>("");
   const [disabledName, setDisabledName] = useState<boolean>(true);
   const [success, setSuccess] = useState<string>("profileContainer");
+  const [errorPass, setErrorPass] = useState<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -286,7 +289,7 @@ function Dashboard() {
     const id = localStorage.getItem("user");
     
     if (isPasswordCorrect(Number(id), query)) {
-
+      setErrorPass(false);
       if (typeEdit == "name") {
         setDisabledName(false);
         setPasswordChang(false);
@@ -297,6 +300,8 @@ function Dashboard() {
         setQuery(""); 
       }
        
+    } else {
+      setErrorPass(true);
     }
   }
 
@@ -318,7 +323,7 @@ function Dashboard() {
             handleRegresar={handleRegresar} handleChangingPassword={handleChangingPassword} 
             handleConfiContra={handleConfiContra} query={query} setQuery={setQuery} userTemp={userTemp}
             typeEdit={typeEdit} setTypeEdit={setTypeEdit} setPasswordChang={setPasswordChang} disabledName={disabledName}
-            handleProfile={handleProfile} success={success} setSuccess={setSuccess}/>
+            handleProfile={handleProfile} success={success} setSuccess={setSuccess} errorPass={errorPass} setErrorPass={setErrorPass}/>
           </div>  
       </div>
     </div>
@@ -341,20 +346,58 @@ function HeaderDash() {
   );
 }
 
-function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handleChangingPassword, handleConfiContra, query, setQuery, userTemp, typeEdit, setTypeEdit, setPasswordChang, disabledName, handleProfile, success, setSuccess}: popOverProp) {
+function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handleConfiContra, query, setQuery, userTemp, typeEdit, setTypeEdit, setPasswordChang, disabledName, handleProfile, success, setSuccess, errorPass, setErrorPass}: popOverProp) {
   const [queryPass, setQueryPass] = useState<string>("");
   const [queryName, setQueryName] = useState<string>("");
+  const [popoverClassName, setPopoverClassName] = useState<string>("popoverPass");
 
-  function handleEdit() {
-    if (passwordChang && typeEdit == "name") {
-      setPasswordChang(!passwordChang);
-    } else if (passwordChang && typeEdit == "pass") {
-      console.log("AHORA CMBIARA NOMBRE");
+  useEffect(() => {
+    if (!errorPass) return;
+
+    setPopoverClassName("popoverPass shake");
+
+    const timer = window.setTimeout(() => {
+      setErrorPass(false);
+      setPopoverClassName("popoverPass");
+    }, 400);
+
+    return () => window.clearTimeout(timer);
+  }, [errorPass, setErrorPass]);
+
+  function handleNameEdit() {
+    if (passwordChang && typeEdit === "name") {
+      setPasswordChang(false);
+      setPopoverClassName("popoverPass");
+      return;
+    }
+
+    if (passwordChang && typeEdit === "pass") {
       setTypeEdit("name");
-    } else {
-      setPasswordChang(!passwordChang);
-      setTypeEdit("name");
-    }  
+      setPopoverClassName("popoverPass name");
+      return;
+    }
+
+    setPopoverClassName("popoverPass name");
+    setPasswordChang(true);
+    setTypeEdit("name");
+  }
+
+  function handlePasswordEdit() {
+    if (passwordChang && typeEdit === "pass") {
+      setPasswordChang(false);
+      setPopoverClassName("popoverPass");
+      return;
+    }
+
+    if (passwordChang && typeEdit === "name") {
+      setTypeEdit("pass");
+      setPopoverClassName("popoverPass pass");
+      return;
+    }
+
+    setPopoverClassName("popoverPass pass");
+    setPasswordChang(true);
+    setTypeEdit("pass");
   }
 
   function handleGuardar() {
@@ -385,7 +428,7 @@ function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handl
                 <label className="signLab1"> Nombre completo</label>
                 <div className="IBContainer">
                   <input disabled={disabledName} value={disabledName ? userTemp.name : queryName} className={!disabledName ? "infoProfile dis" : "infoProfile"} onChange={(e) => setQueryName(e.target.value)}/>
-                  <button className="buttonEdit" onClick={handleEdit}> Edit </button>
+                  <button className="buttonEdit" onClick={handleNameEdit}> Edit </button>
                 </div>
                 
 
@@ -395,7 +438,7 @@ function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handl
                 <label className="signLab1"> Contraseña </label>
                 <div className="IBContainer">
                   <input disabled={disabled} value={disabled ? userTemp.password : queryPass} className={!disabled ? "infoProfile dis" : "infoProfile"} type="password" onChange={(e) => setQueryPass(e.target.value)}/>
-                  <button className="buttonEdit" onClick={handleChangingPassword}> Edit </button>
+                  <button className="buttonEdit" onClick={handlePasswordEdit}> Edit </button>
                 </div>
                 
 
@@ -409,7 +452,7 @@ function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handl
               </div>
             </div>}
 
-            {passwordChang && <div className="popoverPass">
+            {passwordChang && <div className={popoverClassName}>
               <div className="popPassContainer">
                 <label className="signLabPass"> Ingresa tu contraseña </label>
                 <div className="inputContraContainer">

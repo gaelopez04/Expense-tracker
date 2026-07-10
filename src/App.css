@@ -553,13 +553,44 @@ html, body {
     left: 50%;
     z-index: 100;
     transform: translate(-50%, -50%);
+}
+
+.popoverPass.pass {
     animation: popoverPass_init 0.2s forwards;
+}
+
+.popoverPass.name {
+    animation: popoverName_init 0.2s forwards;
+}
+
+.popoverPass.shake {
+    animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+   0% {transform: translate(-50%, -50%);}
+    20% {transform: translate(calc(-50% - 8px), -50%);}
+    40% {transform: translate(calc(-50% + 8px), -50%);}
+    60% {transform: translate(calc(-50% - 8px), -50%);}
+    80% {transform: translate(calc(-50% + 8px), -50%);}
+    100% {transform: translate(-50%, -50%);}
 }
 
 @keyframes popoverPass_init {
     from {
         opacity: 0;
         transform: translate(-20%, -20%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+@keyframes popoverName_init {
+    from {
+        opacity: 0;
+        transform: translate(5%, -80%);
     }
     to {
         opacity: 1;
