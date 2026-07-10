@@ -221,7 +221,7 @@ html, body {
 }
 
 .authLog:hover {
-    border: 1px solid rgb(24, 121, 205);;
+    border: 1px solid rgb(12, 47, 244);
 }
 
 .authBut {
@@ -439,12 +439,44 @@ html, body {
 } 
 
 .headerDash {
+    display: flex;
+    flex-direction: row;
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     margin: 0;
     padding-left: 20px;
     padding-top: 10px;
     padding-right: 10px;
     padding-bottom: 10px;
+}
+
+.budgetHead {
+    display: flex;
+    flex-direction: row;
+    margin-left: 44%;
+}
+
+.budgetlabel1 {
+    margin-top: 7px;
+    font-size: 18px;
+}
+
+.budgetlabel2 {
+    margin-right: 10px;
+    margin-left: 8px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.budgetInput {
+    border-radius: 10px;
+    height: 35px;
+    border: 1px solid grey;
+    outline: none;
+    padding-left: 5px;
+}
+
+.budgetInput:hover {
+    border: 1px solid rgb(12, 47, 244);
 }
 
 .wholeDash1 {
@@ -668,6 +700,7 @@ html, body {
     border-radius: 10px;
     border: 1px transparent;
     align-self: center;
+    margin-left: 10px;
 }
 
 .canGuar {

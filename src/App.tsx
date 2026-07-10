@@ -338,10 +338,20 @@ function HeaderDash() {
   if (account != null) {
     name = account.name;
   }
+
+  const month = new Date().toLocaleString("es-MX", {
+  month: "long",
+  });
   
   return(
     <div className="headerDash">
       <label className="greeting"> Bienvenido, {name} </label>
+
+      <div className="budgetHead">
+        <label className="budgetlabel1"> Presupuesto del mes </label>
+        <label className="budgetlabel2"> {month} </label>
+        <input className="budgetInput" placeholder="Presupuesto"/>
+      </div>
     </div>
   );
 }
