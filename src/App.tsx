@@ -43,7 +43,14 @@ type popOverProp = {
   handleRegresar: () => void,
   query: string,
   setQuery: (value: string) => void
-  userTemp: User
+  userTemp: User,
+  typeEdit: string,
+  setTypeEdit: (value: string) => void,
+  setPasswordChang: (value: boolean) => void,
+  disabledName: boolean,
+  handleProfile: () => void,
+  success: string,
+  setSuccess: (value: string) => void
 }
 
 function App() {
@@ -230,6 +237,9 @@ function Dashboard() {
   const [query, setQuery] = useState<string>("");
   const [disabled, setDisabled] = useState<boolean>(true);
   const [passwordChang, setPasswordChang] = useState<boolean>(false);
+  const [typeEdit, setTypeEdit] = useState<string>("");
+  const [disabledName, setDisabledName] = useState<boolean>(true);
+  const [success, setSuccess] = useState<string>("profileContainer");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -243,41 +253,55 @@ function Dashboard() {
   }, []);
 
   function handleProfile() {
-    setProfile(!profile);
-    console.log(profile);
+    const nextProfile = !profile;
+    setProfile(nextProfile);
+    setSuccess("profileContainer");
 
-    if (!profile) {
-      console.log("ENTRO!!!!!!");
+    if (nextProfile) {
       const id = localStorage.getItem('user');
-      console.log(id);
       const found = getUserByID(Number(id));
-      console.log(found);
       if (found) {
         setUserTemp(found);
       }
     } else {
       setDisabled(true);
+      setDisabledName(true);
       setPasswordChang(false);
     }
   }
 
   function handleChangingPassword() {
-    const id = localStorage.getItem("user");
-    console.log("Entro en changing");
-    setPasswordChang(!passwordChang);
+    if (passwordChang && typeEdit == "pass") {
+      setPasswordChang(!passwordChang);
+    } else if (passwordChang && typeEdit == "name") {
+      setTypeEdit("pass");
+      console.log("AHORA CMBIARA CONTRA");
+    } else {
+      setPasswordChang(!passwordChang);
+      setTypeEdit("pass");
+    }
   }
 
   function handleConfiContra() {
     const id = localStorage.getItem("user");
+    
     if (isPasswordCorrect(Number(id), query)) {
-      setDisabled(false);
-      setPasswordChang(false);
-      setQuery("");  
+
+      if (typeEdit == "name") {
+        setDisabledName(false);
+        setPasswordChang(false);
+
+      } else {
+        setDisabled(false);
+        setPasswordChang(false);
+        setQuery(""); 
+      }
+       
     }
   }
 
   function handleRegresar() {
-    setPasswordChang(false);  
+     setPasswordChang(false);
   }
 
 
@@ -292,7 +316,9 @@ function Dashboard() {
           <div className="wholeDashMedium">
             <ProfilePopOver profile={profile} disabled={disabled} passwordChang={passwordChang} 
             handleRegresar={handleRegresar} handleChangingPassword={handleChangingPassword} 
-            handleConfiContra={handleConfiContra} query={query} setQuery={setQuery} userTemp={userTemp}/>
+            handleConfiContra={handleConfiContra} query={query} setQuery={setQuery} userTemp={userTemp}
+            typeEdit={typeEdit} setTypeEdit={setTypeEdit} setPasswordChang={setPasswordChang} disabledName={disabledName}
+            handleProfile={handleProfile} success={success} setSuccess={setSuccess}/>
           </div>  
       </div>
     </div>
@@ -315,12 +341,36 @@ function HeaderDash() {
   );
 }
 
-function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handleChangingPassword, handleConfiContra, query, setQuery, userTemp}: popOverProp) {
+function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handleChangingPassword, handleConfiContra, query, setQuery, userTemp, typeEdit, setTypeEdit, setPasswordChang, disabledName, handleProfile, success, setSuccess}: popOverProp) {
   const [queryPass, setQueryPass] = useState<string>("");
+  const [queryName, setQueryName] = useState<string>("");
+
+  function handleEdit() {
+    if (passwordChang && typeEdit == "name") {
+      setPasswordChang(!passwordChang);
+    } else if (passwordChang && typeEdit == "pass") {
+      console.log("AHORA CMBIARA NOMBRE");
+      setTypeEdit("name");
+    } else {
+      setPasswordChang(!passwordChang);
+      setTypeEdit("name");
+    }  
+  }
+
+  function handleGuardar() {
+    const id = localStorage.getItem('user');
+    let isSuccess: boolean = false;
+    if (typeEdit == "name") {
+      isSuccess = modifyName(Number(id), queryName);
+    } else {
+      isSuccess = modifyPass(Number(id), queryPass); 
+    }
+    setSuccess(isSuccess ? "profileContainer success" : "profileContainer wrong");
+  } 
 
   return(
     <>
-      {profile && <div className="profileContainer">
+      {profile && <div className={success}>
               <div className="profile">
                 <img src="public\user_icon.png" className="profileUser"/>
                 <label className="profileName"> {userTemp.name} </label>
@@ -334,8 +384,8 @@ function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handl
 
                 <label className="signLab1"> Nombre completo</label>
                 <div className="IBContainer">
-                  <input disabled placeholder={userTemp.name} className="infoProfile"/>
-                  <button className="buttonEdit"> Edit </button>
+                  <input disabled={disabledName} value={disabledName ? userTemp.name : queryName} className={!disabledName ? "infoProfile dis" : "infoProfile"} onChange={(e) => setQueryName(e.target.value)}/>
+                  <button className="buttonEdit" onClick={handleEdit}> Edit </button>
                 </div>
                 
 
@@ -354,8 +404,8 @@ function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handl
               </div>
 
               <div className="canGuar">
-                <button className="buttonCanGuar"> Cancelar </button>
-                <button className="buttonCanGuar"> Guardar </button>
+                <button className="buttonCanGuar" onClick={handleProfile}> Cancelar </button>
+                <button className="buttonCanGuar" onClick={handleGuardar}> Guardar </button>
               </div>
             </div>}
 
@@ -366,7 +416,7 @@ function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handl
                   <input placeholder="Ingresa tu contraseña" className="authLogPass" value={query} onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={e =>{
                     if (e.key === "Enter") handleConfiContra();
-                  }}/>
+                  }} type="password"/>
                   <button className="buttonCanGuar" onClick={handleRegresar}> Regresar </button>
                 </div>
                 
@@ -500,6 +550,36 @@ function isPasswordCorrect(id: number, password: string): boolean {
     if (account.id == id) {
       if (account.password == password) {
         return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function modifyName(id: number, name: string): boolean {
+  for (let account of accounts) {
+    if (account.id == id) {
+      if (testName(name)) {
+        account.name = name;
+        return true;
+      } else {
+        return false
+      }
+    }
+  }
+
+  return false;
+}
+
+function modifyPass(id: number, password: string): boolean {
+  for (let account of accounts) {
+    if (account.id == id) {
+      if (parsingPassword(password)) {
+        account.password = password;
+        return true;
+      } else {
+        return false
       }
     }
   }

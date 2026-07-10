@@ -536,6 +536,14 @@ html, body {
     animation: profile_init 0.4s forwards;
 }
 
+.profileContainer.success {
+    border: 1px solid green;
+}
+
+.profileContainer.wrong {
+    border: 1px solid red;
+}
+
 .popoverPass {
     position: absolute;
     box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.3);
