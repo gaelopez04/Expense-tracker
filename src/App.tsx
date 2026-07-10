@@ -347,11 +347,18 @@ function HeaderDash() {
     <div className="headerDash">
       <label className="greeting"> Bienvenido, {name} </label>
 
-      <div className="budgetHead">
-        <label className="budgetlabel1"> Presupuesto del mes </label>
-        <label className="budgetlabel2"> {month} </label>
-        <input className="budgetInput" placeholder="Presupuesto"/>
+      <div className="budgetHeadContainer">
+        <div className="budgetHead">
+          <label className="budgetlabel1"> Presupuesto del mes </label>
+          <label className="budgetlabel2"> {month} </label>
+          <input className="budgetInput" placeholder="Presupuesto"/>
+        </div>
+
+        <div className="budgetCalendar">
+          <button className="bcBut"> v </button>
+        </div>
       </div>
+      
     </div>
   );
 }
