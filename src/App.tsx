@@ -55,6 +55,29 @@ type popOverProp = {
   setErrorPass: (value: boolean) => void
 }
 
+type calProp = {
+  onClickCal: string
+}
+
+const meses: string[] = [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre"
+];
+
+const fecha = new Date();
+
+console.log(meses[fecha.getMonth()]); // Julio
+
 function App() {
 
   function verifyEmail(email: string): boolean {
@@ -324,6 +347,7 @@ function Dashboard() {
             handleConfiContra={handleConfiContra} query={query} setQuery={setQuery} userTemp={userTemp}
             typeEdit={typeEdit} setTypeEdit={setTypeEdit} setPasswordChang={setPasswordChang} disabledName={disabledName}
             handleProfile={handleProfile} success={success} setSuccess={setSuccess} errorPass={errorPass} setErrorPass={setErrorPass}/>
+
           </div>  
       </div>
     </div>
@@ -331,6 +355,9 @@ function Dashboard() {
 }
 
 function HeaderDash() {
+  const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth());
+  const [onClickCal, setOnClickCal] = useState<string>("calendarBudget");
+
   const user = localStorage.getItem("user");
   const account: User | null = getUserByID(Number(user));
   let name: string = "desconocido";
@@ -339,9 +366,16 @@ function HeaderDash() {
     name = account.name;
   }
 
-  const month = new Date().toLocaleString("es-MX", {
-  month: "long",
-  });
+  function handleClick() {
+    if (onClickCal == "calendarBudget" || onClickCal == "calendarBudget close") {
+      setOnClickCal("calendarBudget open");
+    } else if (onClickCal == "calendarBudget open") {
+      setOnClickCal("calendarBudget close");
+    } else {
+    }
+  }
+
+  const month: string = meses[currentMonth];
   
   return(
     <div className="headerDash">
@@ -355,14 +389,35 @@ function HeaderDash() {
         </div>
 
         <div className="budgetCalendar">
-          <button className="bcBut"> v </button>
+          <button className="bcBut" onClick={handleClick}> v </button>
         </div>
+
+        <BudgetDate onClickCal={onClickCal}/>
       </div>
       
     </div>
   );
 }
 
+function BudgetDate({onClickCal}: calProp) {
+
+  const divMonths = meses.map((m) => {
+    return (
+      <div className="monthDiv" key={m}>
+        <label className="monthLabel"> {m} </label>
+      </div>
+    );
+  });
+
+  return(
+    <div className={onClickCal}>
+      {divMonths}
+    </div>
+  );
+}
+
+
+//DASHBOARD: POPOVER
 function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handleConfiContra, query, setQuery, userTemp, typeEdit, setTypeEdit, setPasswordChang, disabledName, handleProfile, success, setSuccess, errorPass, setErrorPass}: popOverProp) {
   const [queryPass, setQueryPass] = useState<string>("");
   const [queryName, setQueryName] = useState<string>("");
