@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useNavigate, BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useEffect } from 'react'
 import './App.css'
@@ -400,16 +400,53 @@ function HeaderDash() {
 }
 
 function BudgetDate({onClickCal}: calProp) {
+  const [divClick, setDivClick] = useState<boolean[]>(() => Array(meses.length).fill(false));
+  const [daysMonth, setDaysMonth] = useState<ReactNode[]>([]);
 
-  const divMonths = meses.map((m) => {
+  function handleClick(key: number) {
+    const daysNumber: number = new Date(fecha.getFullYear(), key + 1, 0).getDate();
+    const days: number[] = Array.from({ length: daysNumber }, (_, index) => index + 1);
+    const newDivClick = [...divClick];
+
+    for (let i = 0; i < newDivClick.length; ++i) {
+      if (newDivClick[i] == true && i == key) {
+        newDivClick[i] = !newDivClick[i];
+      } else if (newDivClick[i] == false && i == key) {
+        newDivClick[i] = !newDivClick[i];
+      } else {
+        newDivClick[i] = false;
+      }
+    }
+
+    setDivClick(newDivClick);
+
+    if (newDivClick[key]) {
+      setDaysMonth(days.map((d, i) => <label className="day" key={i}> {d} </label>));
+    } else {
+      setDaysMonth([]);
+    }
+  }
+
+  const divMonths = meses.map((m, i) => {
     return (
       <div className="monthDiv" key={m}>
-        <label className="monthLabel"> {m} </label>
+        <div className="monthDivCont" onClick={() => handleClick(i)}>
+          <label className="monthLabel"> {m} </label>
+          <label className="monthBudget"> Pres: 10,000 </label>
+          <label className="monthMon"> Res: 2,000 </label>
+          <button className="monthButton"> v </button>
+        </div>
+
+        {divClick[i] && (
+          <div className="monthCal">
+            {daysMonth}
+          </div>
+        )}
       </div>
     );
   });
 
-  return(
+  return (
     <div className={onClickCal}>
       {divMonths}
     </div>

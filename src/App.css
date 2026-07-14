@@ -331,6 +331,7 @@ html, body {
     padding: 0;
     min-height: 100vh;
     overflow: hidden;
+    z-index: 2;
     transform: translateX(0);
     transition: width 0.35s ease, max-width 0.35s ease, transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
 }
@@ -451,6 +452,8 @@ html, body {
     flex-wrap: nowrap;
     gap: 12px;
     background-color: white;
+    position: relative; /* necesario para que z-index tenga efecto */
+    z-index: 1;          /* queda por encima del calendario */
 }
 
 .budgetHead {
@@ -461,6 +464,7 @@ html, body {
     gap: 10px;
     flex-wrap: nowrap;
     flex-shrink: 0;
+    background-color: white;
 }
 
 .greeting {
@@ -497,12 +501,14 @@ html, body {
     align-items: center;
     gap: 10px;
     padding-right:10px;
+    background-color: white;
 }
 
 .budgetCalendar {
     display: flex;
     align-items: center;
     justify-content: center;
+    background-color: white;
 }
 
 .bcBut {
@@ -828,9 +834,87 @@ html, body {
     }
 }
 
+.monthBudget {
+    margin-top: 5px;
+    font-size: 11px;
+    margin-left: 10px;
+    border-radius: 10px;
+    background-color: rgb(234, 234, 234);
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    color: rgb(96, 96, 96);
+}
+.monthMon {
+    border-radius: 10px;
+    background-color: rgb(183, 228, 199);
+    margin-top: 5px;
+    padding: 3px;
+    font-size: 11px;
+    margin-left: 13px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    color: rgb(64, 145, 108);
+}
+
 .monthDiv {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    z-index: 2;
+}
+
+.monthCal {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    animation: divCont_init 0.4s ease;
+    background-color: white;
+    z-index: 0;
+}
+
+.monthDivCont {
+    display: flex;
+    flex-direction: row;
     padding: 10px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+    background-color: white;
+    z-index: 1;
+}
+
+.day {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    padding: 10px;
+}
+@keyframes divCont_init {
+    from {
+        transform: translateY(-45px);
+    }
+    to {
+        transform: translateY(0px);
+    }
+}
+
+.monthDivCont:hover {
+    transform: scale(1.03);
+    border: 1px solid blue;
+}
+
+.monthDivCont:active {
+    transform: scale(1);
+}
+
+.monthButton {
+    border: transparent;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 7px;
+    margin-left: auto;
+    color: grey;
 }
 
 .monthLabel {
