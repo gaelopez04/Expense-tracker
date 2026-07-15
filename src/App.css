@@ -277,13 +277,76 @@ html, body {
 .wholeDashTop {
     display: flex;
     flex-direction: column;
-    flex: 1 1 auto;
     min-width: 0;
     width: 100%;
 }
 
 .wholeDashMedium {
-    margin: 0;
+    padding: 60px;
+}
+
+.expenseTag {
+    display: flex;
+    flex-direction: column;
+}
+
+.dayLabel {
+    font-size: 50px;
+    font-weight: bold;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+    padding-bottom: 8px;
+}
+
+.billsLabel {
+    display: inline-block;
+    font-size: 40px;
+    font-weight: bold;
+    width: 100%;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+    padding-bottom: 8px;
+}
+
+.stateTag {
+    margin-top: 30px;
+    background-color: rgb(235, 235, 235);
+    border-radius: 25px;
+}
+
+.STContainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.infoTable {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+    table-layout: fixed;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+
+    overflow: hidden;
+    
+}
+
+.infoTable th,
+.infoTable td {
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    text-align: center;
+}
+
+.statsTag{
+    padding: 15px;
+    margin-top: 20px;
+    background-color: rgb(235, 235, 235);
+    border-radius: 25px;
+}
+
+.contentBills {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
 }
 
 .headerSide {
@@ -887,7 +950,7 @@ html, body {
 }
 
 .monthDivCont.disabled {
-    background-color: rgb(212, 211, 211);
+    background-color: rgb(233, 233, 233);
 }
 
 .day {

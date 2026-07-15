@@ -77,8 +77,6 @@ type popOverProp = {
 
 type calProp = {
   onClickCal: string,
-  queryBud: string,
-  setQueryBud: (value: string) => void,
   setDisabledIn: (value: boolean) => void,
   budget: number[],
   onMonthSelect: (monthIndex: number) => void,
@@ -367,12 +365,14 @@ function Dashboard() {
         </div>
 
           <div className="wholeDashMedium">
+
             <ProfilePopOver profile={profile} disabled={disabled} passwordChang={passwordChang} 
             handleRegresar={handleRegresar} handleChangingPassword={handleChangingPassword} 
             handleConfiContra={handleConfiContra} query={query} setQuery={setQuery} userTemp={userTemp}
             typeEdit={typeEdit} setTypeEdit={setTypeEdit} setPasswordChang={setPasswordChang} disabledName={disabledName}
             handleProfile={handleProfile} success={success} setSuccess={setSuccess} errorPass={errorPass} setErrorPass={setErrorPass}/>
 
+            <ExpenseDate/>
           </div>  
       </div>
     </div>
@@ -384,7 +384,10 @@ function HeaderDash() {
   const [onClickCal, setOnClickCal] = useState<string>("calendarBudget");
   const [queryBud, setQueryBud] = useState<string>("");
   const [disabledIn, setDisabledIn] = useState<boolean>(false);
+
   const [budget, setBudget] = useState<number[]>(() => Array(meses.length).fill(0));
+  const [rest, setRest] = useState<number[]>(() => Array(meses.length).fill(0));
+
   const [selectedMonth, setSelectedMonth] = useState<number>(fecha.getMonth());
 
   const user = localStorage.getItem("user");
@@ -405,16 +408,16 @@ function HeaderDash() {
 
   function handleBudget() {
     if (verifyBudget(queryBud)) {
-      const number: number = Number(queryBud);
+      const amount: number = Number(queryBud);
 
       if (containsMonth(Number(user), selectedMonth)) {
-        modifyBudget(Number(user), selectedMonth, number);
+        modifyBudget(Number(user), selectedMonth, amount);
       } else {
-        createBudget(Number(user),number, selectedMonth, number);
+        createBudget(Number(user), amount, selectedMonth, amount);
       }
 
       const newBud = [...budget];
-      newBud[selectedMonth] = number;
+      newBud[selectedMonth] = amount;
       setBudget(newBud);
       setQueryBud("");
       console.log(budgets);
@@ -440,14 +443,58 @@ function HeaderDash() {
           <button className="bcBut" onClick={handleClick}> v </button>
         </div>
 
-        <BudgetDate onClickCal={onClickCal} queryBud={queryBud} setQueryBud={setQueryBud} setDisabledIn={setDisabledIn} budget={budget} onMonthSelect={setSelectedMonth}/>
+        <BudgetDate onClickCal={onClickCal} setDisabledIn={setDisabledIn} budget={budget} onMonthSelect={setSelectedMonth}/>
       </div>
       
     </div>
   );
 }
 
-function BudgetDate({onClickCal, queryBud, setQueryBud, setDisabledIn, budget, onMonthSelect}: calProp) {
+function ExpenseDate() {
+  return(
+    <div className="expenseTag">
+      <div className ="dayTag">
+        <label className="dayLabel"> Martes, 15 de Julio </label>
+      </div>
+
+      <div className="stateTag">
+        <div className="STContainer">
+          <table className="infoTable">
+            <thead>
+              <tr>
+                <th> 
+                  Presupuesto del mes 
+                </th>
+                <th> Restante del mes </th>
+                <th> Gastos del dia </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td> 10,000 </td>
+                <td> 5,000 </td>
+                <td> 5,000 </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="statsTag">
+        <div className="statsTCont">
+          <label className="billsLabel"> Gastos del dia </label>
+        </div>
+
+        <div className="contentBills">
+          {/* Aqui se inyecta conetenido de los bills del dia*/}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BudgetDate({onClickCal, setDisabledIn, budget, onMonthSelect}: calProp) {
   const id = localStorage.getItem("user");
 
   const [divClick, setDivClick] = useState<boolean[]>(() => Array(meses.length).fill(false));
@@ -507,7 +554,6 @@ function BudgetDate({onClickCal, queryBud, setQueryBud, setDisabledIn, budget, o
     </div>
   );
 }
-
 
 //DASHBOARD: POPOVER
 function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handleConfiContra, query, setQuery, userTemp, typeEdit, setTypeEdit, setPasswordChang, disabledName, handleProfile, success, setSuccess, errorPass, setErrorPass}: popOverProp) {
