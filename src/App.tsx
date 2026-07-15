@@ -3,6 +3,8 @@ import { useNavigate, BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useEffect } from 'react'
 import './App.css'
 
+
+//TABLES
 type User = {
   id: number;
   name: string;
@@ -11,7 +13,25 @@ type User = {
   created_at: string;
 };
 
+type Expense = {
+  id: number,
+  id_user: number,
+  amount: number,
+  category: string,
+  description: string,
+  date: string
+}
+
+type Budget = {
+  id: number,
+  id_user: number,
+  amount: number,
+  month: number,
+  rest: number
+}
+
 let accounts: User[] = [];
+let budgets: Budget[] = []
 
 accounts.push({id: 1, name: "Gael Lopez", email: "gael.lopez@prueba.com", password: "simonwe", created_at: new Date().toISOString()});
 
@@ -56,7 +76,12 @@ type popOverProp = {
 }
 
 type calProp = {
-  onClickCal: string
+  onClickCal: string,
+  queryBud: string,
+  setQueryBud: (value: string) => void,
+  setDisabledIn: (value: boolean) => void,
+  budget: number[],
+  onMonthSelect: (monthIndex: number) => void,
 }
 
 const meses: string[] = [
@@ -357,6 +382,10 @@ function Dashboard() {
 function HeaderDash() {
   const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth());
   const [onClickCal, setOnClickCal] = useState<string>("calendarBudget");
+  const [queryBud, setQueryBud] = useState<string>("");
+  const [disabledIn, setDisabledIn] = useState<boolean>(false);
+  const [budget, setBudget] = useState<number[]>(() => Array(meses.length).fill(0));
+  const [selectedMonth, setSelectedMonth] = useState<number>(fecha.getMonth());
 
   const user = localStorage.getItem("user");
   const account: User | null = getUserByID(Number(user));
@@ -371,7 +400,24 @@ function HeaderDash() {
       setOnClickCal("calendarBudget open");
     } else if (onClickCal == "calendarBudget open") {
       setOnClickCal("calendarBudget close");
-    } else {
+    } 
+  }
+
+  function handleBudget() {
+    if (verifyBudget(queryBud)) {
+      const number: number = Number(queryBud);
+
+      if (containsMonth(Number(user), selectedMonth)) {
+        modifyBudget(Number(user), selectedMonth, number);
+      } else {
+        createBudget(Number(user),number, selectedMonth, number);
+      }
+
+      const newBud = [...budget];
+      newBud[selectedMonth] = number;
+      setBudget(newBud);
+      setQueryBud("");
+      console.log(budgets);
     }
   }
 
@@ -385,25 +431,34 @@ function HeaderDash() {
         <div className="budgetHead">
           <label className="budgetlabel1"> Presupuesto del mes </label>
           <label className="budgetlabel2"> {month} </label>
-          <input className="budgetInput" placeholder="Presupuesto"/>
+          <input className="budgetInput" placeholder="Presupuesto" value={queryBud} onKeyDown={e =>{
+                    if (e.key === "Enter") handleBudget();
+                  }} onChange={(e) => setQueryBud(e.target.value)} disabled={disabledIn} type="number"/>
         </div>
 
         <div className="budgetCalendar">
           <button className="bcBut" onClick={handleClick}> v </button>
         </div>
 
-        <BudgetDate onClickCal={onClickCal}/>
+        <BudgetDate onClickCal={onClickCal} queryBud={queryBud} setQueryBud={setQueryBud} setDisabledIn={setDisabledIn} budget={budget} onMonthSelect={setSelectedMonth}/>
       </div>
       
     </div>
   );
 }
 
-function BudgetDate({onClickCal}: calProp) {
+function BudgetDate({onClickCal, queryBud, setQueryBud, setDisabledIn, budget, onMonthSelect}: calProp) {
+  const id = localStorage.getItem("user");
+
   const [divClick, setDivClick] = useState<boolean[]>(() => Array(meses.length).fill(false));
   const [daysMonth, setDaysMonth] = useState<ReactNode[]>([]);
 
+  const disabledMonth = meses.map((_, i) => i < fecha.getMonth());
+
   function handleClick(key: number) {
+    setDisabledIn(disabledMonth[key]);
+    onMonthSelect(key);
+
     const daysNumber: number = new Date(fecha.getFullYear(), key + 1, 0).getDate();
     const days: number[] = Array.from({ length: daysNumber }, (_, index) => index + 1);
     const newDivClick = [...divClick];
@@ -430,9 +485,9 @@ function BudgetDate({onClickCal}: calProp) {
   const divMonths = meses.map((m, i) => {
     return (
       <div className="monthDiv" key={m}>
-        <div className="monthDivCont" onClick={() => handleClick(i)}>
+        <div className={disabledMonth[i] ? "monthDivCont disabled" : "monthDivCont"} onClick={() => handleClick(i)}>
           <label className="monthLabel"> {m} </label>
-          <label className="monthBudget"> Pres: 10,000 </label>
+          <label className="monthBudget"> Pres: {budget[i]} </label>
           <label className="monthMon"> Res: 2,000 </label>
           <button className="monthButton"> v </button>
         </div>
@@ -678,6 +733,11 @@ function testName(name: string): boolean {
    return false;
 }
 
+function verifyBudget(amount: string): boolean {
+  const number = Number(amount);
+  return !Number.isNaN(number) ? true : false; 
+}
+
 
 //CRUD functions
 function createUser(nameUser: string, emailUser: string, passwordUser: string) {
@@ -739,4 +799,52 @@ function modifyPass(id: number, password: string): boolean {
   return false;
 }
 
+function getBudgetsUser(id_user: number): Budget[] {
+  const budgetsUser: Budget[] = [];
+  for (const budgetUser of budgets) {
+    if (budgetUser.id_user == id_user) {
+      budgetsUser.push(budgetUser);
+    }
+  }
+
+  budgetsUser.sort((a, b) => a.month - b.month);
+  return budgetsUser;
+}
+
+function containsMonth(id_user: number, month: number): boolean {
+  console.log(budgets);
+  for (const budget of budgets) {
+    if (budget.id_user == id_user) {
+      console.log(budget.id_user + " | " + id_user);
+      if (budget.month == month) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function modifyBudget(id_user: number, month: number, amount: number): boolean {
+  console.log("Lo modifique");
+  for (const budget of budgets) {
+    if (budget.id_user == id_user) {
+      if (budget.month == month) {
+        budget.amount = amount;
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function createBudget(id_user: number, amount: number, month: number, rest: number) {
+  const newBudget: Budget = {id: budgets.length + 1, id_user: id_user, amount: amount, month: month, rest: rest};
+  budgets.push(newBudget);
+  budgets.sort((a, b) => a.month - b.month);
+}
+
+function differenceAmount() {
+  
+}
 export default App

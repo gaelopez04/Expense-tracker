@@ -865,6 +865,7 @@ html, body {
     flex-direction: column;
     background-color: white;
     z-index: 2;
+    position: relative;
 }
 
 .monthCal {
@@ -882,6 +883,11 @@ html, body {
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     background-color: white;
     z-index: 1;
+    box-sizing: border-box;
+}
+
+.monthDivCont.disabled {
+    background-color: rgb(212, 211, 211);
 }
 
 .day {
@@ -890,6 +896,14 @@ html, body {
     align-items: center;
     border: 1px solid rgba(0, 0, 0, 0.15);
     padding: 10px;
+}
+
+.day:hover {
+    transform: scale(1.05);
+}
+
+.day:active {
+    transform: scale(1);
 }
 @keyframes divCont_init {
     from {
@@ -901,7 +915,6 @@ html, body {
 }
 
 .monthDivCont:hover {
-    transform: scale(1.03);
     border: 1px solid blue;
 }
 
