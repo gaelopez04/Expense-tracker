@@ -52,6 +52,8 @@ type statusHideProp = {
 
 type profileProp = {
   onProfile: () => void
+  selected: boolean[],
+  setSelected: (value: boolean[]) => void
 }
 
 type popOverProp = {
@@ -80,6 +82,15 @@ type calProp = {
   setDisabledIn: (value: boolean) => void,
   budget: number[],
   onMonthSelect: (monthIndex: number) => void,
+  setDateSel: (value: Date | null) => void,
+  setOnSight: (value: boolean) => void
+}
+
+type DateProp = {
+  dateSel?: Date | null,
+  setOnSight: (value: boolean) => void,
+  setDateSel: (value: Date | null) => void,
+  onSight?: boolean
 }
 
 const meses: string[] = [
@@ -290,6 +301,10 @@ function Dashboard() {
   const [success, setSuccess] = useState<string>("profileContainer");
   const [errorPass, setErrorPass] = useState<boolean>(false);
   const navigate = useNavigate();
+  const [dateSel, setDateSel] = useState<Date | null>(null);
+  const [onSight, setOnSight] = useState<boolean>(false);
+
+  const [selected, setSelected] = useState<boolean[]>(Array(4).fill(false));
 
   useEffect(() => {
     const id = localStorage.getItem("user");
@@ -358,10 +373,10 @@ function Dashboard() {
 
   return(
     <div className="wholeDash1">
-      <SideBar onProfile={handleProfile}/>
+      <SideBar onProfile={handleProfile} selected={selected} setSelected={setSelected}/>
       <div className="wholeDash">
         <div className="wholeDashTop">
-          <HeaderDash/>
+          <HeaderDash setDateSel={setDateSel} setOnSight={setOnSight}/>
         </div>
 
           <div className="wholeDashMedium">
@@ -372,14 +387,14 @@ function Dashboard() {
             typeEdit={typeEdit} setTypeEdit={setTypeEdit} setPasswordChang={setPasswordChang} disabledName={disabledName}
             handleProfile={handleProfile} success={success} setSuccess={setSuccess} errorPass={errorPass} setErrorPass={setErrorPass}/>
 
-            <ExpenseDate/>
+            {onSight && <ExpenseDate dateSel={dateSel} setOnSight={setOnSight} setDateSel={setDateSel}/>}
           </div>  
       </div>
     </div>
   );
 }
 
-function HeaderDash() {
+function HeaderDash({setDateSel, setOnSight}: DateProp) {
   const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth());
   const [onClickCal, setOnClickCal] = useState<string>("calendarBudget");
   const [queryBud, setQueryBud] = useState<string>("");
@@ -443,18 +458,40 @@ function HeaderDash() {
           <button className="bcBut" onClick={handleClick}> v </button>
         </div>
 
-        <BudgetDate onClickCal={onClickCal} setDisabledIn={setDisabledIn} budget={budget} onMonthSelect={setSelectedMonth}/>
+        <BudgetDate onClickCal={onClickCal} setDisabledIn={setDisabledIn} budget={budget} onMonthSelect={setSelectedMonth} setDateSel={setDateSel} setOnSight={setOnSight}/>
       </div>
       
     </div>
   );
 }
 
-function ExpenseDate() {
+function ExpenseDate({dateSel}: DateProp) {
+
+  let year: number | string = "Error";
+  let month: number | string = "Error";
+  let dayName: string = "Error";
+  let day: number | string = "Error";
+  const daysOfWeek: string[] = [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado"
+  ];
+
+  if (dateSel) {
+    year = dateSel.getFullYear();
+    month = meses[dateSel.getMonth()];
+    dayName = daysOfWeek[dateSel.getDay()];
+    day = dateSel.getDate();
+  }
+
   return(
-    <div className="expenseTag">
+    <div className={"expenseTag"}>
       <div className ="dayTag">
-        <label className="dayLabel"> Martes, 15 de Julio </label>
+        <label className="dayLabel"> {dayName}, {day} de {month} </label>
       </div>
 
       <div className="stateTag">
@@ -483,7 +520,11 @@ function ExpenseDate() {
 
       <div className="statsTag">
         <div className="statsTCont">
-          <label className="billsLabel"> Gastos del dia </label>
+          <div className="divTitleBills">
+            <label className="billsLabel"> Gastos del dia </label>
+            <label className="add"> + </label>
+          </div>
+          
         </div>
 
         <div className="contentBills">
@@ -494,7 +535,7 @@ function ExpenseDate() {
   );
 }
 
-function BudgetDate({onClickCal, setDisabledIn, budget, onMonthSelect}: calProp) {
+function BudgetDate({onClickCal, setDisabledIn, budget, onMonthSelect, setDateSel, setOnSight}: calProp) {
   const id = localStorage.getItem("user");
 
   const [divClick, setDivClick] = useState<boolean[]>(() => Array(meses.length).fill(false));
@@ -523,10 +564,17 @@ function BudgetDate({onClickCal, setDisabledIn, budget, onMonthSelect}: calProp)
     setDivClick(newDivClick);
 
     if (newDivClick[key]) {
-      setDaysMonth(days.map((d, i) => <label className="day" key={i}> {d} </label>));
+      setDaysMonth(days.map((d, _) => <label className="day" key={d} onClick={() => handleDay(key, d)}> {d} </label>));
     } else {
       setDaysMonth([]);
     }
+  }
+
+  function handleDay(month: number, day: number) {
+    const date: Date | null = new Date(fecha.getFullYear(), month, day);
+    setDateSel(date);
+    console.log(date);
+    setOnSight(true);
   }
 
   const divMonths = meses.map((m, i) => {
@@ -680,7 +728,7 @@ function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handl
 }
 
 //SIDEBAR===========================================================================================
-function SideBar({onProfile}: profileProp) {
+function SideBar({onProfile, selected, setSelected}: profileProp) {
   const [hideClicked, setHideClicked] = useState<boolean>(false);
 
   function handleClick() {
@@ -692,7 +740,7 @@ function SideBar({onProfile}: profileProp) {
       
       <aside className={hideClicked ? "sideBar hide" : "sideBar"}>
         <HeaderSideBar onHide={handleClick}/>
-        <OptionsSideDash/>
+        <OptionsSideDash selected={selected} setSelected={setSelected}/>
         <BottomSideDash hideStatus={hideClicked} onProfile={onProfile}/>
       </aside>
     </>
@@ -708,13 +756,41 @@ function HeaderSideBar({onHide}: hideProp) {
   );
 }
 
-function OptionsSideDash() {
+type optionsProp = {
+  selected: boolean[],
+  setSelected: (value: boolean[]) => void
+};
+
+function OptionsSideDash({selected, setSelected}: optionsProp) {
+  const [isHover, setIsHover] = useState<boolean[]>(Array(2).fill(false));
+
+  function handleHover(numberOp: number, hover: boolean) {
+    const newHover: boolean[] = [...isHover];
+    newHover[numberOp] = hover;
+    setIsHover(newHover);
+  }
 
   return(
     <div className="optionSide">
-      <label></label>
-      <label></label>
-      <label></label>
+      <div className="optionContainer">
+        <div className="optionDiv" onMouseEnter={() => handleHover(0, true)} onMouseLeave={() => handleHover(0, false)}>
+          <img className="expenseIcon" src="public\crear_gasto.png"/>
+          <label className="optionLabel"> Agregar gasto </label>
+          {isHover[0] && <label className="arrow"> {`>`} </label>}
+        </div>
+        <div className="optionDiv" onMouseEnter={() => handleHover(1, true)} onMouseLeave={() => handleHover(1, false)}>
+          <img className="dayIcon" src="public\dia.png"/>
+          <label className="optionLabel"> Dia </label>
+          {isHover[1] && <label className="arrow"> {`>`} </label>}
+        </div>
+        <div className="optionDiv">
+          {/* <label className="optionLabel"> Aun no se</label> */}
+        </div>
+        
+        
+        
+      </div>
+      
     </div>
   );
 }
