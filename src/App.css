@@ -283,6 +283,7 @@ html, body {
 
 .wholeDashMedium {
     padding: 60px;
+    overflow: auto;
 }
 
 .expenseTag {
@@ -382,7 +383,120 @@ html, body {
 .contentBills {
     display: flex;
     flex-direction: column;
-    overflow: auto;
+}
+
+.informationBill {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+}
+
+.addTitle {
+    font-weight: 500;
+}
+
+.addInput {
+    border-radius: 10px;
+    height: 35px;
+    border: 1px solid grey;
+    outline: none;
+    width: 50%;
+    padding-left: 10px;
+}
+
+.dateInput {
+    border-radius: 10px;
+    height: 35px;
+    border: 1px solid grey;
+    outline: none;
+    width: 30%;
+    padding-left: 10px;
+}
+
+.customSelect {
+    position: relative;
+    width: 30%;
+}
+
+.selectButton {
+    width: 100%;
+    height: 35px;
+    border: 1px solid grey;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: .2s ease;
+}
+
+.selectButton:hover, .addArea:hover  {
+    border-color: blue;
+}
+
+.selectMenu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+     z-index: 5;
+    width: 100%;
+
+    background: white;
+    border: 1px solid #353535;
+    border-radius: 10px;
+
+    list-style: none;
+    margin-top: 0;
+    padding: 6px 0;
+
+    overflow: hidden;
+
+    z-index: 100;
+    transition: .2s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,.35);
+    animation: menu_init 0.3s ease;
+}
+
+@keyframes menu_init {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+}
+
+.selectMenu li {
+    font-size: 14px;
+    padding: 5px 16px;
+    cursor: pointer;
+
+    transition: background .15s ease;
+}
+
+.selectMenu li:hover {
+    background: #eeecec;
+}
+
+.arrow {
+    transition: transform .2s ease;
+}
+
+.arrow.open {
+    transform: rotate(180deg);
+}
+
+.addArea {
+    border-radius: 10px;
+    width: 50%;
+    height: 75px;
+    font-family: "Pliant", sans-serif;
+    padding-left: 7px;
+    outline: none;
 }
 
 .headerSide {
@@ -638,7 +752,7 @@ html, body {
     background: rgba(0, 0, 0, 0.1);
 }
 
-.budgetInput:hover {
+.budgetInput:hover, .addInput:hover {
     border: 1px solid rgb(12, 47, 244);
 }
 
@@ -660,12 +774,12 @@ html, body {
 }
 
 .optionContainer {
-    gap: 10px;
     display: flex;
     flex-direction: column;
 }
 
 .optionDiv {
+    padding: 5px 5px 5px 0px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -682,7 +796,7 @@ html, body {
     transform: scale(1);
 }
 
-.dayIcon, .expenseIcon {
+.dayIcon, .expenseIcon, .homeIcon {
     width: 25px;
     height: 25px;
     align-self: center;

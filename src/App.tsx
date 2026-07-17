@@ -53,7 +53,10 @@ type statusHideProp = {
 type profileProp = {
   onProfile: () => void
   selected: boolean[],
-  setSelected: (value: boolean[]) => void
+  setSelected: (value: boolean[]) => void,
+  setDateSel: (value: Date | null) => void,
+  setOnSight: (value: boolean) => void,
+  onSight?: boolean
 }
 
 type popOverProp = {
@@ -304,7 +307,7 @@ function Dashboard() {
   const [dateSel, setDateSel] = useState<Date | null>(null);
   const [onSight, setOnSight] = useState<boolean>(false);
 
-  const [selected, setSelected] = useState<boolean[]>(Array(4).fill(false));
+  const [selected, setSelected] = useState<boolean[]>(Array(3).fill(false));
 
   useEffect(() => {
     const id = localStorage.getItem("user");
@@ -373,7 +376,7 @@ function Dashboard() {
 
   return(
     <div className="wholeDash1">
-      <SideBar onProfile={handleProfile} selected={selected} setSelected={setSelected}/>
+      <SideBar onProfile={handleProfile} selected={selected} setSelected={setSelected} setDateSel={setDateSel} onSight={onSight} setOnSight={setOnSight}/>
       <div className="wholeDash">
         <div className="wholeDashTop">
           <HeaderDash setDateSel={setDateSel} setOnSight={setOnSight}/>
@@ -388,6 +391,7 @@ function Dashboard() {
             handleProfile={handleProfile} success={success} setSuccess={setSuccess} errorPass={errorPass} setErrorPass={setErrorPass}/>
 
             {onSight && <ExpenseDate dateSel={dateSel} setOnSight={setOnSight} setDateSel={setDateSel}/>}
+            {selected[1] && <AddExpense/>}
           </div>  
       </div>
     </div>
@@ -465,6 +469,107 @@ function HeaderDash({setDateSel, setOnSight}: DateProp) {
   );
 }
 
+type Category = {
+  value: string;
+  label: string;
+};
+
+function AddExpense() {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+
+  const categories: Category[] = [
+    { value: "transport", label: "Transporte" },
+    { value: "shop", label: "Compras" },
+    { value: "enter", label: "Entretenimiento" },
+    { value: "food", label: "Alimento" },
+    { value: "health", label: "Salud" },
+    { value: "saving", label: "Ahorros" },
+    { value: "bill", label: "Servicios" },
+    { value: "other", label: "Otro" },
+  ];
+
+  return(
+    <div className="expenseTag">
+      <div className="dayTag">
+        <label className="dayLabel"> Agregar gasto </label>
+      </div>
+
+      <div className="stateTag">
+        <TableExp/>
+      </div>
+
+      <div className="statsTag">
+        <div className="statsTCont">
+          <div className="divTitleBills">
+            <label className="billsLabel"> Ingresa el gasto </label>
+          </div>
+          
+        </div>
+
+        <div className="contentBills">
+          <div className="informationBill">
+            <label className="addTitle"> Ingresa el titulo </label>
+            <input placeholder="ingresa el titulo" className="addInput"/>
+
+            <label className="addTitle"> Ingresa la cantidad </label>
+            <input placeholder="ingresa la cantidad" className="addInput"/>
+
+            <label className="addTitle"> Selecciona una categoria </label>
+            <CustomSelect options={categories} value={selectedCategory} onChange={setSelectedCategory}/>
+            
+            
+            <label className="addTitle"> Ingresa la descripción </label>
+            <textarea className="addArea"/>
+
+            <label className="addTitle"> Ingresa la fecha </label>
+            <input type="date" className="dateInput"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+type SelectProps = {
+  options: Category[];
+  value: Category | null;
+  onChange: (value: Category | null) => void;
+};
+
+function CustomSelect({ options, value, onChange }: SelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="customSelect">
+      <button
+        type="button"
+        className="selectButton"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {value?.label ?? "Selecciona una categoría"}
+        <span  className={isOpen ? "arrow open" : "arrow"}>▼</span>
+      </button>
+
+      {isOpen && (
+        <ul className="selectMenu">
+          {options.map((category) => (
+            <li
+              key={category.value}
+              onClick={() => {
+                onChange(category);
+                setIsOpen(false);
+              }}
+            >
+              {category.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function ExpenseDate({dateSel}: DateProp) {
 
   let year: number | string = "Error";
@@ -489,13 +594,35 @@ function ExpenseDate({dateSel}: DateProp) {
   }
 
   return(
-    <div className={"expenseTag"}>
+    <div className="expenseTag">
       <div className ="dayTag">
         <label className="dayLabel"> {dayName}, {day} de {month} </label>
       </div>
 
       <div className="stateTag">
-        <div className="STContainer">
+        <TableExp/>
+      </div>
+
+      <div className="statsTag">
+        <div className="statsTCont">
+          <div className="divTitleBills">
+            <label className="billsLabel"> Gastos del dia </label>
+            <label className="add"> + </label>
+          </div>
+          
+        </div>
+
+        <div className="contentBills">
+          {/* Aqui se inyecta conetenido de los bills del dia*/}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TableExp() {
+  return(
+    <div className="STContainer">
           <table className="infoTable">
             <thead>
               <tr>
@@ -516,22 +643,6 @@ function ExpenseDate({dateSel}: DateProp) {
             </tbody>
           </table>
         </div>
-      </div>
-
-      <div className="statsTag">
-        <div className="statsTCont">
-          <div className="divTitleBills">
-            <label className="billsLabel"> Gastos del dia </label>
-            <label className="add"> + </label>
-          </div>
-          
-        </div>
-
-        <div className="contentBills">
-          {/* Aqui se inyecta conetenido de los bills del dia*/}
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -727,8 +838,9 @@ function ProfilePopOver({profile, disabled, passwordChang, handleRegresar, handl
   );
 }
 
+
 //SIDEBAR===========================================================================================
-function SideBar({onProfile, selected, setSelected}: profileProp) {
+function SideBar({onProfile, selected, setSelected, setDateSel, onSight, setOnSight}: profileProp) {
   const [hideClicked, setHideClicked] = useState<boolean>(false);
 
   function handleClick() {
@@ -740,7 +852,7 @@ function SideBar({onProfile, selected, setSelected}: profileProp) {
       
       <aside className={hideClicked ? "sideBar hide" : "sideBar"}>
         <HeaderSideBar onHide={handleClick}/>
-        <OptionsSideDash selected={selected} setSelected={setSelected}/>
+        <OptionsSideDash selected={selected} setSelected={setSelected} setDateSel={setDateSel} onSight={onSight} setOnSight={setOnSight}/>
         <BottomSideDash hideStatus={hideClicked} onProfile={onProfile}/>
       </aside>
     </>
@@ -758,11 +870,14 @@ function HeaderSideBar({onHide}: hideProp) {
 
 type optionsProp = {
   selected: boolean[],
-  setSelected: (value: boolean[]) => void
+  setSelected: (value: boolean[]) => void,
+  setDateSel: (value: Date | null) => void,
+  onSight?: boolean,
+  setOnSight: (value: boolean) => void
 };
 
-function OptionsSideDash({selected, setSelected}: optionsProp) {
-  const [isHover, setIsHover] = useState<boolean[]>(Array(2).fill(false));
+function OptionsSideDash({selected, setSelected, setDateSel, onSight, setOnSight}: optionsProp) {
+  const [isHover, setIsHover] = useState<boolean[]>(Array(3).fill(false));
 
   function handleHover(numberOp: number, hover: boolean) {
     const newHover: boolean[] = [...isHover];
@@ -770,18 +885,44 @@ function OptionsSideDash({selected, setSelected}: optionsProp) {
     setIsHover(newHover);
   }
 
+  function handleSelected(sel: number) {
+    const newSelected: boolean[] = Array(3).fill(false);
+    newSelected[sel] = true;
+
+    if (sel == 2) {
+        if (!onSight) {
+          setOnSight(true);
+        } 
+        
+        const dateToday: Date | null = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+        setDateSel(dateToday);
+    } else {
+      setOnSight(false);
+    } 
+
+    console.log(newSelected);
+    setSelected(newSelected);
+  }
+
   return(
     <div className="optionSide">
+
+      <div className="optionDiv" onMouseEnter={() => handleHover(0, true)} onMouseLeave={() => handleHover(0, false)} onClick={() => handleSelected(0)}>
+        <img className="homeIcon" src="public\inicio.png"/>
+        <label className="optionLabel"> Inicio </label>
+        {isHover[0] && <label className="arrow"> {`>`} </label>}
+      </div>
+
       <div className="optionContainer">
-        <div className="optionDiv" onMouseEnter={() => handleHover(0, true)} onMouseLeave={() => handleHover(0, false)}>
+        <div className="optionDiv" onMouseEnter={() => handleHover(1, true)} onMouseLeave={() => handleHover(1, false)} onClick={() => handleSelected(1)}>
           <img className="expenseIcon" src="public\crear_gasto.png"/>
           <label className="optionLabel"> Agregar gasto </label>
-          {isHover[0] && <label className="arrow"> {`>`} </label>}
+          {isHover[1] && <label className="arrow"> {`>`} </label>}
         </div>
-        <div className="optionDiv" onMouseEnter={() => handleHover(1, true)} onMouseLeave={() => handleHover(1, false)}>
+        <div className="optionDiv" onMouseEnter={() => handleHover(2, true)} onMouseLeave={() => handleHover(2, false)} onClick={() => handleSelected(2)}>
           <img className="dayIcon" src="public\dia.png"/>
           <label className="optionLabel"> Dia </label>
-          {isHover[1] && <label className="arrow"> {`>`} </label>}
+          {isHover[2] && <label className="arrow"> {`>`} </label>}
         </div>
         <div className="optionDiv">
           {/* <label className="optionLabel"> Aun no se</label> */}
