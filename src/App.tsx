@@ -16,10 +16,11 @@ type User = {
 type Expense = {
   id: number,
   id_user: number,
+  title: string,
   amount: number,
   category: string,
   description: string,
-  date: string
+  date: Date
 }
 
 type Budget = {
@@ -31,7 +32,8 @@ type Budget = {
 }
 
 let accounts: User[] = [];
-let budgets: Budget[] = []
+let budgets: Budget[] = [];
+let expenses: Expense[] = [];
 
 accounts.push({id: 1, name: "Gael Lopez", email: "gael.lopez@prueba.com", password: "simonwe", created_at: new Date().toISOString()});
 
@@ -476,14 +478,35 @@ type Category = {
 
 function AddExpense() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState<Category | null>(null);
-  const [selectedDay, setSelectedDay] = useState<Category | null>(null);
   const [daysMonth, setDaysMonth] = useState<Category[]>(Array());
 
   const [queryTitle, setQueryTitle] = useState<string>("");
-  const [queryAmount, setQueryAmount] = useState<number>(0);
+  const [queryAmount, setQueryAmount] = useState<number | undefined>(0);
   const [queryDes, setQueryDes] = useState<string>("");
+  const [selectedMonth, setSelectedMonth] = useState<Category | null>(null);
+  const [selectedDay, setSelectedDay] = useState<Category | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+
+  const [progress, setProgress] = useState(0);
+const [loading, setLoading] = useState(false);
+
+const handleSave = async () => {
+    setLoading(true);
+    setProgress(0);
+
+    // Simular progreso
+    setProgress(20);
+
+    // Haces la petición
+    await handleAdd();
+
+    setProgress(100);
+
+    setTimeout(() => {
+        setLoading(false);
+        setProgress(0);
+    }, 200);
+};
 
   const categories: Category[] = [
     { value: "transport", label: "Transporte" },
@@ -529,9 +552,18 @@ function AddExpense() {
   }
   
 
-
+  //Funcion a aniadir, para agreagr gastos ya
   function handleAdd() {
+    const date: Date = new Date(fecha.getFullYear(), Number(selectedMonth?.value), Number(selectedDay?.label));
+    const id = Number(localStorage.getItem("user"));
+    createExpense(id,queryTitle, queryAmount ?? 0, queryDes, (selectedCategory ?? {value: "0", label: "Error"}), date);
 
+    setQueryTitle("");
+    setQueryDes("");
+    setQueryAmount("");
+    setSelectedCategory(null);
+    setSelectedMonth(null);
+    setSelectedDay(null);
   }
 
   return(
@@ -553,19 +585,20 @@ function AddExpense() {
         </div>
 
         <div className="contentBills">
-          <div className="informationBill">
+
+          <div className="informationBill" style={{"--progress": loading ? `${progress}%` : "0%",} as React.CSSProperties}>
             <label className="addTitle"> Ingresa el titulo * </label>
-            <input placeholder="ingresa el titulo" className="addInput"/>
+            <input placeholder="ingresa el titulo" className="addInput" value={queryTitle} onChange={(e) => setQueryTitle(e.target.value)}/>
 
             <label className="addTitle"> Ingresa la cantidad * </label>
-            <input placeholder="ingresa la cantidad" className="addInput" type="number"/>
+            <input placeholder="ingresa la cantidad" className="addInput" type="number" value={queryAmount} onChange={(e) => setQueryAmount(Number(e.target.value))}/>
 
             <label className="addTitle"> Selecciona una categoria * </label>
             <CustomSelect options={categories} value={selectedCategory} onChange={setSelectedCategory} enun={"Selecciona una categoria"}/>
             
             
             <label className="addTitle"> Ingresa la descripción </label>
-            <textarea className="addArea"/>
+            <textarea className="addArea" value={queryDes} onChange={(e) => setQueryDes(e.target.value)}/>
 
             <label className="addTitle"> Ingresa la fecha * </label>
             <div className="dateContainer">
@@ -575,7 +608,7 @@ function AddExpense() {
             
 
             <div className="buttonContainer">
-              <button className="addButton" onClick={handleAdd}> Agregar </button>
+              <button className="addButton" onClick={handleSave}> Agregar </button>
             </div>
           </div>
         </div>
@@ -1159,6 +1192,15 @@ function createBudget(id_user: number, amount: number, month: number, rest: numb
   const newBudget: Budget = {id: budgets.length + 1, id_user: id_user, amount: amount, month: month, rest: rest};
   budgets.push(newBudget);
   budgets.sort((a, b) => a.month - b.month);
+}
+
+function createExpense(id_user: number, title: string, amount: number, description: string, category: Category, date: Date): boolean {
+  const expense: Expense = {id: expenses.length + 1, id_user: id_user, title: title, amount: amount, category: (category?.label ?? "Error"), description: description
+      , date: date};
+
+  console.log(expense);
+  expenses.push(expense);
+  return true;
 }
 
 function differenceAmount() {
