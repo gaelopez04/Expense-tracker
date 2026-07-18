@@ -477,6 +477,12 @@ type Category = {
 function AddExpense() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<Category | null>(null);
+  const [daysMonth, setDaysMonth] = useState<Category[] | null>(null);
+
+  const [queryTitle, setQueryTitle] = useState<string>("");
+  const [queryAmount, setQueryAmount] = useState<number>(0);
+  const [queryDes, setQueryDes] = useState<string>("");
 
   const categories: Category[] = [
     { value: "transport", label: "Transporte" },
@@ -489,8 +495,25 @@ function AddExpense() {
     { value: "other", label: "Otro" },
   ];
 
+  const months: Category[] = [
+    {value: "Jan", label: "Enero"},
+    {value: "Feb", label: "Febrero"},
+    {value: "Mar", label: "Marzo"},
+    {value: "Ap", label: "Abril"},
+    {value: "may", label: "Mayo"},
+    {value: "jun", label: "Junio"},
+    {value: "jul", label: "Julio"},
+    {value: "aug", label: "Agosto"},
+    {value: "sep", label: "Septiembre"},
+    {value: "oct", label: "Octubre"},
+    {value: "nov", label: "Noviembre"},
+    {value: "dec", label: "Diciembre"},
+  ];
+  
+
+
   function handleAdd() {
-    
+
   }
 
   return(
@@ -517,7 +540,7 @@ function AddExpense() {
             <input placeholder="ingresa el titulo" className="addInput"/>
 
             <label className="addTitle"> Ingresa la cantidad * </label>
-            <input placeholder="ingresa la cantidad" className="addInput"/>
+            <input placeholder="ingresa la cantidad" className="addInput" type="number"/>
 
             <label className="addTitle"> Selecciona una categoria * </label>
             <CustomSelect options={categories} value={selectedCategory} onChange={setSelectedCategory}/>
@@ -527,6 +550,7 @@ function AddExpense() {
             <textarea className="addArea"/>
 
             <label className="addTitle"> Ingresa la fecha * </label>
+            <CustomSelect options={months} value={selectedMonth} onChange={setSelectedMonth}/>
             <input type="date" className="dateInput"/>
 
             <div className="buttonContainer">
