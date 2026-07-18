@@ -5,8 +5,6 @@ html, body {
     min-height: 100%;
 }
 
-body {
-}
 
 * {
     box-sizing: border-box;
@@ -274,7 +272,6 @@ body {
     flex-direction: column;
     flex: 1 1 auto;
     min-width: 0;
-    overflow: auto;
     width: 100%;
 }
 
@@ -419,11 +416,11 @@ body {
 
 .customSelect {
     position: relative;
-    width: 30%;
+    width: 15%;
 }
 
 .selectButton {
-    width: 100%;
+    width: 70%;
     height: 35px;
     border: 1px solid grey;
     border-radius: 10px;
@@ -444,7 +441,8 @@ body {
     top: calc(100% + 6px);
     left: 0;
      z-index: 5;
-    width: 100%;
+    width: 70%;
+    height: 150px;
 
     background: white;
     border: 1px solid #353535;
@@ -454,7 +452,7 @@ body {
     margin-top: 0;
     padding: 6px 0;
 
-    overflow: hidden;
+    overflow: auto;
 
     z-index: 100;
     transition: .2s ease;
@@ -475,7 +473,7 @@ body {
 
 .selectMenu li {
     font-size: 14px;
-    padding: 5px 16px;
+    padding: 5px;
     cursor: pointer;
 
     transition: background .15s ease;
@@ -514,9 +512,15 @@ body {
     height: 25px;
     max-width: 80px;
     width: 100%;
-    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);9
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
     height: 30px;
 }
+
+.dateContainer {
+    display: flex;
+    flex-direction: row;
+}
+
 
 .headerSide {
     display: flex;
@@ -566,6 +570,8 @@ body {
     transform: translateX(0);
     transition: width 0.35s ease, max-width 0.35s ease, transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
     background-color: white;
+    overflow: hidden;
+    height: 100%;
 }
 
 .sideBar.hide {

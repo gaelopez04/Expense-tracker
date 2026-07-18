@@ -478,7 +478,8 @@ function AddExpense() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<Category | null>(null);
-  const [daysMonth, setDaysMonth] = useState<Category[] | null>(null);
+  const [selectedDay, setSelectedDay] = useState<Category | null>(null);
+  const [daysMonth, setDaysMonth] = useState<Category[]>(Array());
 
   const [queryTitle, setQueryTitle] = useState<string>("");
   const [queryAmount, setQueryAmount] = useState<number>(0);
@@ -496,19 +497,36 @@ function AddExpense() {
   ];
 
   const months: Category[] = [
-    {value: "Jan", label: "Enero"},
-    {value: "Feb", label: "Febrero"},
-    {value: "Mar", label: "Marzo"},
-    {value: "Ap", label: "Abril"},
-    {value: "may", label: "Mayo"},
-    {value: "jun", label: "Junio"},
-    {value: "jul", label: "Julio"},
-    {value: "aug", label: "Agosto"},
-    {value: "sep", label: "Septiembre"},
-    {value: "oct", label: "Octubre"},
-    {value: "nov", label: "Noviembre"},
-    {value: "dec", label: "Diciembre"},
+    {value: "0", label: "Enero"},
+    {value: "1", label: "Febrero"},
+    {value: "2", label: "Marzo"},
+    {value: "3", label: "Abril"},
+    {value: "4", label: "Mayo"},
+    {value: "5", label: "Junio"},
+    {value: "6", label: "Julio"},
+    {value: "7", label: "Agosto"},
+    {value: "8", label: "Septiembre"},
+    {value: "9", label: "Octubre"},
+    {value: "10", label: "Noviembre"},
+    {value: "11", label: "Diciembre"},
   ];
+
+  function handleMonthDays(category: Category | null) {
+    console.log("Nuevo mes seleccionado:" + category);
+    setSelectedMonth(category);
+    setDaysMonth([]);
+    let newDaysMonth: Category[] = [];
+    const num: number = Number(category?.value ?? 0);
+    const days: number = new Date(fecha.getFullYear(), num + 1, 0).getDate();
+
+      console.log(days);
+    for (let i = 1; i <= days; ++i) {
+      const cat: Category = {value: String(i) + "_", label: String(i)};
+      newDaysMonth.push(cat);
+    }
+
+    setDaysMonth(newDaysMonth);
+  }
   
 
 
@@ -543,15 +561,18 @@ function AddExpense() {
             <input placeholder="ingresa la cantidad" className="addInput" type="number"/>
 
             <label className="addTitle"> Selecciona una categoria * </label>
-            <CustomSelect options={categories} value={selectedCategory} onChange={setSelectedCategory}/>
+            <CustomSelect options={categories} value={selectedCategory} onChange={setSelectedCategory} enun={"Selecciona una categoria"}/>
             
             
             <label className="addTitle"> Ingresa la descripción </label>
             <textarea className="addArea"/>
 
             <label className="addTitle"> Ingresa la fecha * </label>
-            <CustomSelect options={months} value={selectedMonth} onChange={setSelectedMonth}/>
-            <input type="date" className="dateInput"/>
+            <div className="dateContainer">
+              <CustomSelect options={months} value={selectedMonth} onChange={handleMonthDays} enun={"Mes"}/>
+              <CustomSelect options={daysMonth} value={selectedDay} onChange={setSelectedDay} enun={"Dia"}/>
+            </div>
+            
 
             <div className="buttonContainer">
               <button className="addButton" onClick={handleAdd}> Agregar </button>
@@ -567,9 +588,10 @@ type SelectProps = {
   options: Category[];
   value: Category | null;
   onChange: (value: Category | null) => void;
+  enun: string
 };
 
-function CustomSelect({ options, value, onChange }: SelectProps) {
+function CustomSelect({ options, value, onChange, enun}: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -579,7 +601,7 @@ function CustomSelect({ options, value, onChange }: SelectProps) {
         className="selectButton"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {value?.label ?? "Selecciona una categoría"}
+        {value?.label ?? enun}
         <span  className={isOpen ? "arrow open" : "arrow"}>▼</span>
       </button>
 
