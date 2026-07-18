@@ -5,6 +5,9 @@ html, body {
     min-height: 100%;
 }
 
+body {
+}
+
 * {
     box-sizing: border-box;
 }
@@ -271,6 +274,7 @@ html, body {
     flex-direction: column;
     flex: 1 1 auto;
     min-width: 0;
+    overflow: auto;
     width: 100%;
 }
 
@@ -283,7 +287,6 @@ html, body {
 
 .wholeDashMedium {
     padding: 60px;
-    overflow: auto;
 }
 
 .expenseTag {
@@ -499,6 +502,22 @@ html, body {
     outline: none;
 }
 
+.buttonContainer {
+    display: flex;
+}
+
+.addButton {
+    margin-right: 10px;
+    margin-left: auto;
+    border: 1px transparent;
+    border-radius: 10px;
+    height: 25px;
+    max-width: 80px;
+    width: 100%;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);9
+    height: 30px;
+}
+
 .headerSide {
     display: flex;
     align-items: center;
@@ -543,7 +562,6 @@ html, body {
     flex-shrink: 0;
     padding: 0;
     min-height: 100vh;
-    overflow: hidden;
     z-index: 2;
     transform: translateX(0);
     transition: width 0.35s ease, max-width 0.35s ease, transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
@@ -742,12 +760,12 @@ html, body {
     transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
 }
 
-.bcBut:hover {
+.bcBut:hover, .addButton:hover {
     background: rgba(0, 0, 0, 0.08);
     border-color: rgba(0, 0, 0, 0.16);
 }
 
-.bcBut:active {
+.bcBut:active, .addButton:active {
     transform: scale(0.97);
     background: rgba(0, 0, 0, 0.1);
 }

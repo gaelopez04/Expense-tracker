@@ -489,6 +489,10 @@ function AddExpense() {
     { value: "other", label: "Otro" },
   ];
 
+  function handleAdd() {
+    
+  }
+
   return(
     <div className="expenseTag">
       <div className="dayTag">
@@ -509,21 +513,25 @@ function AddExpense() {
 
         <div className="contentBills">
           <div className="informationBill">
-            <label className="addTitle"> Ingresa el titulo </label>
+            <label className="addTitle"> Ingresa el titulo * </label>
             <input placeholder="ingresa el titulo" className="addInput"/>
 
-            <label className="addTitle"> Ingresa la cantidad </label>
+            <label className="addTitle"> Ingresa la cantidad * </label>
             <input placeholder="ingresa la cantidad" className="addInput"/>
 
-            <label className="addTitle"> Selecciona una categoria </label>
+            <label className="addTitle"> Selecciona una categoria * </label>
             <CustomSelect options={categories} value={selectedCategory} onChange={setSelectedCategory}/>
             
             
             <label className="addTitle"> Ingresa la descripción </label>
             <textarea className="addArea"/>
 
-            <label className="addTitle"> Ingresa la fecha </label>
+            <label className="addTitle"> Ingresa la fecha * </label>
             <input type="date" className="dateInput"/>
+
+            <div className="buttonContainer">
+              <button className="addButton" onClick={handleAdd}> Agregar </button>
+            </div>
           </div>
         </div>
       </div>
