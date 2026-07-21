@@ -41,16 +41,16 @@ console.log(accounts[0]);
 
 type emailProp = {
   testEmail: (email: string) => boolean
-}
+};
 
 type hideProp = {
   onHide: () => void
-}
+};
 
 type statusHideProp = {
   hideStatus: boolean,
   onProfile: () => void
-}
+};
 
 type profileProp = {
   onProfile: () => void
@@ -59,7 +59,7 @@ type profileProp = {
   setDateSel: (value: Date | null) => void,
   setOnSight: (value: boolean) => void,
   onSight?: boolean
-}
+};
 
 type popOverProp = {
   profile: boolean,
@@ -80,7 +80,7 @@ type popOverProp = {
   setSuccess: (value: string) => void,
   errorPass: boolean,
   setErrorPass: (value: boolean) => void
-}
+};
 
 type calProp = {
   onClickCal: string,
@@ -88,15 +88,20 @@ type calProp = {
   budget: number[],
   onMonthSelect: (monthIndex: number) => void,
   setDateSel: (value: Date | null) => void,
-  setOnSight: (value: boolean) => void
-}
+  setOnSight: (value: boolean) => void,
+  setBudRest?: (value: Budget) => void
+};
 
 type DateProp = {
   dateSel?: Date | null,
   setOnSight: (value: boolean) => void,
   setDateSel: (value: Date | null) => void,
-  onSight?: boolean
-}
+  onSight?: boolean,
+  budRest: Budget,
+  setBudRest: (value: Budget) => void,
+  setSelected: (value: boolean[]) => void,
+  selected: boolean[]
+};
 
 const meses: string[] = [
     "Enero",
@@ -311,6 +316,9 @@ function Dashboard() {
 
   const [selected, setSelected] = useState<boolean[]>(Array(3).fill(false));
 
+  //BUDGET AND REST
+  const [budRest, setBudRest] = useState<Budget>({id: -1, id_user: -1, amount: 0, month: 0, rest: 0});
+
   useEffect(() => {
     const id = localStorage.getItem("user");
     if (!id) {
@@ -381,7 +389,7 @@ function Dashboard() {
       <SideBar onProfile={handleProfile} selected={selected} setSelected={setSelected} setDateSel={setDateSel} onSight={onSight} setOnSight={setOnSight}/>
       <div className="wholeDash">
         <div className="wholeDashTop">
-          <HeaderDash setDateSel={setDateSel} setOnSight={setOnSight}/>
+          <HeaderDash setDateSel={setDateSel} setOnSight={setOnSight} setBudRest={setBudRest}/>
         </div>
 
           <div className="wholeDashMedium">
@@ -392,15 +400,15 @@ function Dashboard() {
             typeEdit={typeEdit} setTypeEdit={setTypeEdit} setPasswordChang={setPasswordChang} disabledName={disabledName}
             handleProfile={handleProfile} success={success} setSuccess={setSuccess} errorPass={errorPass} setErrorPass={setErrorPass}/>
 
-            {onSight && <ExpenseDate dateSel={dateSel} setOnSight={setOnSight} setDateSel={setDateSel}/>}
-            {selected[1] && <AddExpense/>}
+            {onSight && <ExpenseDate onSight={onSight} dateSel={dateSel} setOnSight={setOnSight} setDateSel={setDateSel} budRest={budRest} setBudRest={setBudRest} setSelected={setSelected} selected={selected}/>}
+            {selected[1] && <AddExpense budRest={budRest} setBudRest={setBudRest}/>}
           </div>  
       </div>
     </div>
   );
 }
 
-function HeaderDash({setDateSel, setOnSight}: DateProp) {
+function HeaderDash({setDateSel, setOnSight, setBudRest}: DateProp) {
   const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth());
   const [onClickCal, setOnClickCal] = useState<string>("calendarBudget");
   const [queryBud, setQueryBud] = useState<string>("");
@@ -430,7 +438,7 @@ function HeaderDash({setDateSel, setOnSight}: DateProp) {
   function handleBudget() {
     if (verifyBudget(queryBud)) {
       const amount: number = Number(queryBud);
-
+      
       if (containsMonth(Number(user), selectedMonth)) {
         modifyBudget(Number(user), selectedMonth, amount);
       } else {
@@ -442,6 +450,16 @@ function HeaderDash({setDateSel, setOnSight}: DateProp) {
       setBudget(newBud);
       setQueryBud("");
       console.log(budgets);
+
+      if (fecha.getMonth() == selectedMonth) {
+        
+        const id = localStorage.getItem("user");
+
+        const tempBud: Budget = getBudget(Number(id), selectedMonth);
+        const newBud: Budget = {id: tempBud.id, id_user: tempBud.id_user, amount: tempBud.amount, month: tempBud.month, rest: tempBud.rest};
+
+        setBudRest(newBud);
+      }
     }
   }
 
@@ -476,8 +494,13 @@ type Category = {
   label: string;
 };
 
-function AddExpense() {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+type BudPass = {
+  budRest: Budget,
+  setBudRest: (value: Budget) => void
+}
+
+function AddExpense({budRest, setBudRest}: BudPass) {
   const [daysMonth, setDaysMonth] = useState<Category[]>(Array());
 
   const [queryTitle, setQueryTitle] = useState<string>("");
@@ -486,27 +509,6 @@ function AddExpense() {
   const [selectedMonth, setSelectedMonth] = useState<Category | null>(null);
   const [selectedDay, setSelectedDay] = useState<Category | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-
-  const [progress, setProgress] = useState(0);
-const [loading, setLoading] = useState(false);
-
-const handleSave = async () => {
-    setLoading(true);
-    setProgress(0);
-
-    // Simular progreso
-    setProgress(20);
-
-    // Haces la petición
-    await handleAdd();
-
-    setProgress(100);
-
-    setTimeout(() => {
-        setLoading(false);
-        setProgress(0);
-    }, 200);
-};
 
   const categories: Category[] = [
     { value: "transport", label: "Transporte" },
@@ -557,10 +559,14 @@ const handleSave = async () => {
     const date: Date = new Date(fecha.getFullYear(), Number(selectedMonth?.value), Number(selectedDay?.label));
     const id = Number(localStorage.getItem("user"));
     createExpense(id,queryTitle, queryAmount ?? 0, queryDes, (selectedCategory ?? {value: "0", label: "Error"}), date);
+    
+    const newBudRest = getBudget(Number(id), date.getMonth());
+    const tempBud = {id: newBudRest.id, id_user: newBudRest.id_user, amount: newBudRest.amount, month: newBudRest.month, rest: newBudRest.rest};
+    setBudRest(tempBud);
 
     setQueryTitle("");
     setQueryDes("");
-    setQueryAmount("");
+    setQueryAmount(0);
     setSelectedCategory(null);
     setSelectedMonth(null);
     setSelectedDay(null);
@@ -573,7 +579,7 @@ const handleSave = async () => {
       </div>
 
       <div className="stateTag">
-        <TableExp/>
+        <TableExp budRest={budRest} setBudRest={setBudRest}/>
       </div>
 
       <div className="statsTag">
@@ -586,7 +592,7 @@ const handleSave = async () => {
 
         <div className="contentBills">
 
-          <div className="informationBill" style={{"--progress": loading ? `${progress}%` : "0%",} as React.CSSProperties}>
+          <div className="informationBill">
             <label className="addTitle"> Ingresa el titulo * </label>
             <input placeholder="ingresa el titulo" className="addInput" value={queryTitle} onChange={(e) => setQueryTitle(e.target.value)}/>
 
@@ -608,7 +614,7 @@ const handleSave = async () => {
             
 
             <div className="buttonContainer">
-              <button className="addButton" onClick={handleSave}> Agregar </button>
+              <button className="addButton" onClick={handleAdd}> Agregar </button>
             </div>
           </div>
         </div>
@@ -657,7 +663,8 @@ function CustomSelect({ options, value, onChange, enun}: SelectProps) {
   );
 }
 
-function ExpenseDate({dateSel}: DateProp) {
+function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOnSight, onSight}: DateProp) {
+
 
   let year: number | string = "Error";
   let month: number | string = "Error";
@@ -680,6 +687,37 @@ function ExpenseDate({dateSel}: DateProp) {
     day = dateSel.getDate();
   }
 
+  //  function handleSelected(sel: number) {
+  //   const newSelected: boolean[] = Array(3).fill(false);
+  //   newSelected[sel] = true;
+
+  //   if (sel == 2) {
+  //       if (!onSight) {
+  //         setOnSight(true);
+  //       } 
+        
+  //       const dateToday: Date | null = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+  //       setDateSel(dateToday);
+  //   } else {
+  //     setOnSight(false);
+  //   } 
+
+  //   console.log(newSelected);
+  //   setSelected(newSelected);
+  // }
+
+  function handleAdd() {
+    const newSelected: boolean[] = Array(3).fill(false);
+    newSelected[1] = true;
+
+    if (onSight) {
+      setOnSight(false);
+    }
+
+    setSelected(newSelected);
+
+  }
+
   return(
     <div className="expenseTag">
       <div className ="dayTag">
@@ -687,14 +725,14 @@ function ExpenseDate({dateSel}: DateProp) {
       </div>
 
       <div className="stateTag">
-        <TableExp/>
+        <TableExp budRest={budRest} setBudRest={setBudRest}/>
       </div>
 
       <div className="statsTag">
         <div className="statsTCont">
           <div className="divTitleBills">
             <label className="billsLabel"> Gastos del dia </label>
-            <label className="add"> + </label>
+            <label className="add" onClick={handleAdd}> + </label>
           </div>
           
         </div>
@@ -707,7 +745,8 @@ function ExpenseDate({dateSel}: DateProp) {
   );
 }
 
-function TableExp() {
+function TableExp({budRest, setBudRest}: BudPass) {
+
   return(
     <div className="STContainer">
           <table className="infoTable">
@@ -723,8 +762,8 @@ function TableExp() {
 
             <tbody>
               <tr>
-                <td> 10,000 </td>
-                <td> 5,000 </td>
+                <td> {budRest.amount} </td>
+                <td> {budRest.rest} </td>
                 <td> 5,000 </td>
               </tr>
             </tbody>
@@ -1174,12 +1213,24 @@ function containsMonth(id_user: number, month: number): boolean {
   return false;
 }
 
+function getBudget(id_user: number, month: number): Budget {
+  
+  for (const budget of budgets) {
+    if (budget.id_user == id_user && budget.month == month) {
+      return budget;
+    }
+  }
+
+  return {id: -1, id_user: -1, amount: 0, month: 0, rest: 0};
+}
+
 function modifyBudget(id_user: number, month: number, amount: number): boolean {
   console.log("Lo modifique");
   for (const budget of budgets) {
     if (budget.id_user == id_user) {
       if (budget.month == month) {
         budget.amount = amount;
+        budget.rest = amount;
         return true;
       }
     }
@@ -1198,12 +1249,23 @@ function createExpense(id_user: number, title: string, amount: number, descripti
   const expense: Expense = {id: expenses.length + 1, id_user: id_user, title: title, amount: amount, category: (category?.label ?? "Error"), description: description
       , date: date};
 
-  console.log(expense);
+    differenceAmount(expense);
+
   expenses.push(expense);
   return true;
 }
 
-function differenceAmount() {
+function differenceAmount(expense: Expense): boolean {
   
+  const budgetsUser: Budget[] = getBudgetsUser(expense.id_user);
+
+  for (let bud of budgetsUser) {
+    if (expense.date.getMonth() == bud.month) {
+      bud.rest -= expense.amount;
+      return true;
+    }
+  }
+
+  return false;
 }
 export default App
