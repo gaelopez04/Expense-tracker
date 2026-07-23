@@ -89,7 +89,8 @@ type calProp = {
   onMonthSelect: (monthIndex: number) => void,
   setDateSel: (value: Date | null) => void,
   setOnSight: (value: boolean) => void,
-  setBudRest?: (value: Budget) => void
+  setBudRest?: (value: Budget) => void,
+  rest: number[]
 };
 
 type DateProp = {
@@ -100,7 +101,9 @@ type DateProp = {
   budRest: Budget,
   setBudRest: (value: Budget) => void,
   setSelected: (value: boolean[]) => void,
-  selected: boolean[]
+  selected: boolean[],
+  rest: number[],
+  setRest: (value: number[]) => void
 };
 
 const meses: string[] = [
@@ -316,8 +319,10 @@ function Dashboard() {
 
   const [selected, setSelected] = useState<boolean[]>(Array(3).fill(false));
 
+
   //BUDGET AND REST
   const [budRest, setBudRest] = useState<Budget>({id: -1, id_user: -1, amount: 0, month: 0, rest: 0});
+  const [rest, setRest] = useState<number[]>(() => Array(meses.length).fill(0));
 
   useEffect(() => {
     const id = localStorage.getItem("user");
@@ -389,7 +394,7 @@ function Dashboard() {
       <SideBar onProfile={handleProfile} selected={selected} setSelected={setSelected} setDateSel={setDateSel} onSight={onSight} setOnSight={setOnSight}/>
       <div className="wholeDash">
         <div className="wholeDashTop">
-          <HeaderDash setDateSel={setDateSel} setOnSight={setOnSight} setBudRest={setBudRest}/>
+          <HeaderDash setDateSel={setDateSel} setOnSight={setOnSight} setBudRest={setBudRest} rest={rest} setRest={setRest}/>
         </div>
 
           <div className="wholeDashMedium">
@@ -401,27 +406,48 @@ function Dashboard() {
             handleProfile={handleProfile} success={success} setSuccess={setSuccess} errorPass={errorPass} setErrorPass={setErrorPass}/>
 
             {onSight && <ExpenseDate onSight={onSight} dateSel={dateSel} setOnSight={setOnSight} setDateSel={setDateSel} budRest={budRest} setBudRest={setBudRest} setSelected={setSelected} selected={selected}/>}
-            {selected[1] && <AddExpense budRest={budRest} setBudRest={setBudRest}/>}
+            {selected[1] && <AddExpense budRest={budRest} setBudRest={setBudRest} rest={rest} setRest={setRest}/>}
           </div>  
       </div>
     </div>
   );
 }
 
-function HeaderDash({setDateSel, setOnSight, setBudRest}: DateProp) {
+function HeaderDash({setDateSel, setOnSight, setBudRest, rest, setRest}: DateProp) {
   const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth());
   const [onClickCal, setOnClickCal] = useState<string>("calendarBudget");
   const [queryBud, setQueryBud] = useState<string>("");
   const [disabledIn, setDisabledIn] = useState<boolean>(false);
 
   const [budget, setBudget] = useState<number[]>(() => Array(meses.length).fill(0));
-  const [rest, setRest] = useState<number[]>(() => Array(meses.length).fill(0));
 
   const [selectedMonth, setSelectedMonth] = useState<number>(fecha.getMonth());
 
   const user = localStorage.getItem("user");
   const account: User | null = getUserByID(Number(user));
   let name: string = "desconocido";
+
+  useEffect(() => {
+    //Iniciar budget de todos los meses anteriores
+    const newBud: number[] = [...budget];
+    const newRest: number[] = [...rest];
+
+    for (let i = 0; i < budget.length; ++i) {
+      const bud: Budget = getBudget(Number(user), i);
+      
+      const amounTemp: number = bud.amount;
+      const resTemp: number = bud.rest;
+
+      newBud[i] = amounTemp;
+      newRest[i] = resTemp;
+    }
+
+    setBudget(newBud);
+    setRest(newRest);
+  }, []);
+
+ 
+
 
   if (account != null) {
     name = account.name;
@@ -440,9 +466,17 @@ function HeaderDash({setDateSel, setOnSight, setBudRest}: DateProp) {
       const amount: number = Number(queryBud);
       
       if (containsMonth(Number(user), selectedMonth)) {
-        modifyBudget(Number(user), selectedMonth, amount);
+        const tempRest: number = modifyBudget(Number(user), selectedMonth, amount);
+
+        const newRest = [...rest];
+        newRest[selectedMonth] = tempRest;
+        setRest(newRest);
       } else {
         createBudget(Number(user), amount, selectedMonth, amount);
+
+        const newRest = [...rest];
+        newRest[selectedMonth] = amount;
+        setRest(newRest);
       }
 
       const newBud = [...budget];
@@ -482,7 +516,7 @@ function HeaderDash({setDateSel, setOnSight, setBudRest}: DateProp) {
           <button className="bcBut" onClick={handleClick}> v </button>
         </div>
 
-        <BudgetDate onClickCal={onClickCal} setDisabledIn={setDisabledIn} budget={budget} onMonthSelect={setSelectedMonth} setDateSel={setDateSel} setOnSight={setOnSight}/>
+        <BudgetDate onClickCal={onClickCal} setDisabledIn={setDisabledIn} budget={budget} onMonthSelect={setSelectedMonth} setDateSel={setDateSel} setOnSight={setOnSight} rest={rest}/>
       </div>
       
     </div>
@@ -497,10 +531,17 @@ type Category = {
 
 type BudPass = {
   budRest: Budget,
+  setBudRest: (value: Budget) => void,
+  rest: number[],
+  setRest: (value: number[]) => void
+}
+
+type TableExpp = {
+  budRest: Budget,
   setBudRest: (value: Budget) => void
 }
 
-function AddExpense({budRest, setBudRest}: BudPass) {
+function AddExpense({budRest, setBudRest, rest, setRest}: BudPass) {
   const [daysMonth, setDaysMonth] = useState<Category[]>(Array());
 
   const [queryTitle, setQueryTitle] = useState<string>("");
@@ -558,12 +599,18 @@ function AddExpense({budRest, setBudRest}: BudPass) {
   function handleAdd() {
     const date: Date = new Date(fecha.getFullYear(), Number(selectedMonth?.value), Number(selectedDay?.label));
     const id = Number(localStorage.getItem("user"));
-    createExpense(id,queryTitle, queryAmount ?? 0, queryDes, (selectedCategory ?? {value: "0", label: "Error"}), date);
+    const resTemp: number = createExpense(id,queryTitle, queryAmount ?? 0, queryDes, (selectedCategory ?? {value: "0", label: "Error"}), date);
     
-    const newBudRest = getBudget(Number(id), date.getMonth());
-    const tempBud = {id: newBudRest.id, id_user: newBudRest.id_user, amount: newBudRest.amount, month: newBudRest.month, rest: newBudRest.rest};
-    setBudRest(tempBud);
+    if (date.getMonth() == fecha.getMonth()) {
+      const newBudRest = getBudget(Number(id), date.getMonth());
+      const tempBud = {id: newBudRest.id, id_user: newBudRest.id_user, amount: newBudRest.amount, month: newBudRest.month, rest: newBudRest.rest};
+      setBudRest(tempBud);
+    } 
 
+    const newRest: number[] = [...rest];
+    newRest[date.getMonth()] = resTemp;
+    setRest(newRest);
+    
     setQueryTitle("");
     setQueryDes("");
     setQueryAmount(0);
@@ -745,7 +792,7 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
   );
 }
 
-function TableExp({budRest, setBudRest}: BudPass) {
+function TableExp({budRest, setBudRest}: TableExpp) {
 
   return(
     <div className="STContainer">
@@ -772,7 +819,7 @@ function TableExp({budRest, setBudRest}: BudPass) {
   );
 }
 
-function BudgetDate({onClickCal, setDisabledIn, budget, onMonthSelect, setDateSel, setOnSight}: calProp) {
+function BudgetDate({onClickCal, setDisabledIn, budget, onMonthSelect, setDateSel, setOnSight, rest}: calProp) {
   const id = localStorage.getItem("user");
 
   const [divClick, setDivClick] = useState<boolean[]>(() => Array(meses.length).fill(false));
@@ -820,7 +867,7 @@ function BudgetDate({onClickCal, setDisabledIn, budget, onMonthSelect, setDateSe
         <div className={disabledMonth[i] ? "monthDivCont disabled" : "monthDivCont"} onClick={() => handleClick(i)}>
           <label className="monthLabel"> {m} </label>
           <label className="monthBudget"> Pres: {budget[i]} </label>
-          <label className="monthMon"> Res: 2,000 </label>
+          <label className="monthMon"> Res: {rest[i]} </label>
           <button className="monthButton"> v </button>
         </div>
 
@@ -1224,19 +1271,21 @@ function getBudget(id_user: number, month: number): Budget {
   return {id: -1, id_user: -1, amount: 0, month: 0, rest: 0};
 }
 
-function modifyBudget(id_user: number, month: number, amount: number): boolean {
+function modifyBudget(id_user: number, month: number, amount: number): number {
   console.log("Lo modifique");
   for (const budget of budgets) {
     if (budget.id_user == id_user) {
       if (budget.month == month) {
+        
+        const difference: number = amount - budget.amount;
         budget.amount = amount;
-        budget.rest = amount;
-        return true;
+        budget.rest += difference;
+        return budget.rest;
       }
     }
   }
 
-  return false;
+  return 0;
 }
 
 function createBudget(id_user: number, amount: number, month: number, rest: number) {
@@ -1245,27 +1294,27 @@ function createBudget(id_user: number, amount: number, month: number, rest: numb
   budgets.sort((a, b) => a.month - b.month);
 }
 
-function createExpense(id_user: number, title: string, amount: number, description: string, category: Category, date: Date): boolean {
+function createExpense(id_user: number, title: string, amount: number, description: string, category: Category, date: Date): number {
   const expense: Expense = {id: expenses.length + 1, id_user: id_user, title: title, amount: amount, category: (category?.label ?? "Error"), description: description
       , date: date};
 
-    differenceAmount(expense);
+    const newRest: number = differenceAmount(expense);
 
   expenses.push(expense);
-  return true;
+  return newRest;
 }
 
-function differenceAmount(expense: Expense): boolean {
+function differenceAmount(expense: Expense): number {
   
   const budgetsUser: Budget[] = getBudgetsUser(expense.id_user);
 
   for (let bud of budgetsUser) {
     if (expense.date.getMonth() == bud.month) {
       bud.rest -= expense.amount;
-      return true;
+      return bud.rest;
     }
   }
 
-  return false;
+  return -1;
 }
 export default App
