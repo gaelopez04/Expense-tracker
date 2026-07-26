@@ -384,6 +384,23 @@ html, body {
 .contentBills {
     display: flex;
     flex-direction: column;
+    padding: 5px;
+
+}
+
+.expenseDiv {
+    display: flex;
+    flex-direction: row;
+    padding: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.titleExpense {
+    margin-left: 10%;
+}
+
+.amountExpense {
+    margin-left: auto;
 }
 
 .informationBill {

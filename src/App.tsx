@@ -103,7 +103,8 @@ type DateProp = {
   setSelected: (value: boolean[]) => void,
   selected: boolean[],
   rest: number[],
-  setRest: (value: number[]) => void
+  setRest: (value: number[]) => void,
+  exps: Expense[]
 };
 
 const meses: string[] = [
@@ -324,6 +325,9 @@ function Dashboard() {
   const [budRest, setBudRest] = useState<Budget>({id: -1, id_user: -1, amount: 0, month: 0, rest: 0});
   const [rest, setRest] = useState<number[]>(() => Array(meses.length).fill(0));
 
+  const id = localStorage.getItem("user");
+  const [exps, setExps] = useState<Expense[]>(sumAllExpenses(Number(id), fecha.getMonth()));
+
   useEffect(() => {
     const id = localStorage.getItem("user");
     if (!id) {
@@ -405,8 +409,8 @@ function Dashboard() {
             typeEdit={typeEdit} setTypeEdit={setTypeEdit} setPasswordChang={setPasswordChang} disabledName={disabledName}
             handleProfile={handleProfile} success={success} setSuccess={setSuccess} errorPass={errorPass} setErrorPass={setErrorPass}/>
 
-            {onSight && <ExpenseDate onSight={onSight} dateSel={dateSel} setOnSight={setOnSight} setDateSel={setDateSel} budRest={budRest} setBudRest={setBudRest} setSelected={setSelected} selected={selected}/>}
-            {selected[1] && <AddExpense budRest={budRest} setBudRest={setBudRest} rest={rest} setRest={setRest}/>}
+            {onSight && <ExpenseDate onSight={onSight} dateSel={dateSel} setOnSight={setOnSight} setDateSel={setDateSel} budRest={budRest} setBudRest={setBudRest} setSelected={setSelected} selected={selected} exps={exps}/>}
+            {selected[1] && <AddExpense budRest={budRest} setBudRest={setBudRest} rest={rest} setRest={setRest} exps={exps} setExps={setExps}/>}
           </div>  
       </div>
     </div>
@@ -533,15 +537,18 @@ type BudPass = {
   budRest: Budget,
   setBudRest: (value: Budget) => void,
   rest: number[],
-  setRest: (value: number[]) => void
+  setRest: (value: number[]) => void,
+  exps: Expense[],
+  setExps: (value: Expense[]) => void
 }
 
 type TableExpp = {
   budRest: Budget,
-  setBudRest: (value: Budget) => void
+  setBudRest: (value: Budget) => void,
+  exps: Expense[]
 }
 
-function AddExpense({budRest, setBudRest, rest, setRest}: BudPass) {
+function AddExpense({budRest, setBudRest, rest, setRest, exps, setExps}: BudPass) {
   const [daysMonth, setDaysMonth] = useState<Category[]>(Array());
 
   const [queryTitle, setQueryTitle] = useState<string>("");
@@ -605,6 +612,8 @@ function AddExpense({budRest, setBudRest, rest, setRest}: BudPass) {
       const newBudRest = getBudget(Number(id), date.getMonth());
       const tempBud = {id: newBudRest.id, id_user: newBudRest.id_user, amount: newBudRest.amount, month: newBudRest.month, rest: newBudRest.rest};
       setBudRest(tempBud);
+      console.log(setExps);
+      setExps(sumAllExpenses(id, date.getMonth()));
     } 
 
     const newRest: number[] = [...rest];
@@ -626,7 +635,7 @@ function AddExpense({budRest, setBudRest, rest, setRest}: BudPass) {
       </div>
 
       <div className="stateTag">
-        <TableExp budRest={budRest} setBudRest={setBudRest}/>
+        <TableExp budRest={budRest} setBudRest={setBudRest} exps={exps}/>
       </div>
 
       <div className="statsTag">
@@ -710,7 +719,7 @@ function CustomSelect({ options, value, onChange, enun}: SelectProps) {
   );
 }
 
-function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOnSight, onSight}: DateProp) {
+function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOnSight, onSight, exps}: DateProp) {
 
 
   let year: number | string = "Error";
@@ -765,6 +774,16 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
 
   }
 
+  const expss = exps.map((e, i) => {
+    return(
+      <div className="expenseDiv" key={i}>
+        <input type="checkbox"/>
+        <label className="titleExpense"> {e.title} </label>
+        <label className="amountExpense"> {e.amount} </label>
+      </div>
+    );
+  });
+
   return(
     <div className="expenseTag">
       <div className ="dayTag">
@@ -772,7 +791,7 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
       </div>
 
       <div className="stateTag">
-        <TableExp budRest={budRest} setBudRest={setBudRest}/>
+        <TableExp budRest={budRest} setBudRest={setBudRest} exps={exps}/>
       </div>
 
       <div className="statsTag">
@@ -785,14 +804,14 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
         </div>
 
         <div className="contentBills">
-          {/* Aqui se inyecta conetenido de los bills del dia*/}
+          {expss}
         </div>
       </div>
     </div>
   );
 }
 
-function TableExp({budRest, setBudRest}: TableExpp) {
+function TableExp({budRest, setBudRest, exps}: TableExpp) {
 
   return(
     <div className="STContainer">
@@ -811,7 +830,7 @@ function TableExp({budRest, setBudRest}: TableExpp) {
               <tr>
                 <td> {budRest.amount} </td>
                 <td> {budRest.rest} </td>
-                <td> 5,000 </td>
+                <td> {exps.reduce((a, b) => a + b.amount, 0)} </td>
               </tr>
             </tbody>
           </table>
@@ -1302,6 +1321,11 @@ function createExpense(id_user: number, title: string, amount: number, descripti
 
   expenses.push(expense);
   return newRest;
+}
+
+function sumAllExpenses(id_user: number, month: number): Expense[] {
+  const expense: Expense[] = expenses.filter((e) => e.id_user == id_user && e.date.getMonth() == month);
+  return expense;
 }
 
 function differenceAmount(expense: Expense): number {
