@@ -388,6 +388,35 @@ html, body {
 
 }
 
+.searchBar {
+    display: flex;
+    flex-direction: row;
+    padding-bottom: 15px;
+    padding-top: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.searchInput {
+    border: none;
+    height: 25px;
+    border-bottom: 1px solid grey;
+    outline: none;
+    width: 20%;
+    background-color: rgb(233, 233, 233);
+    padding-left: 1px;
+}
+
+.searchInput:hover {
+    border-color: blue;
+}
+
+.exisLabel {
+    margin: 2% 0% 1% 0%;
+    align-self: center;
+    color: rgb(102, 102, 102);
+    font-style: italic;
+}
+
 .expenseDiv {
     display: flex;
     flex-direction: row;

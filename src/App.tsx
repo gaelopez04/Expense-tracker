@@ -104,7 +104,8 @@ type DateProp = {
   selected: boolean[],
   rest: number[],
   setRest: (value: number[]) => void,
-  exps: Expense[]
+  exps: Expense[],
+  anyElement: boolean
 };
 
 const meses: string[] = [
@@ -322,11 +323,14 @@ function Dashboard() {
 
 
   //BUDGET AND REST
-  const [budRest, setBudRest] = useState<Budget>({id: -1, id_user: -1, amount: 0, month: 0, rest: 0});
+  const id = localStorage.getItem("user");
+
+  const [budRest, setBudRest] = useState<Budget>(getBudget(Number(id), fecha.getMonth()));
   const [rest, setRest] = useState<number[]>(() => Array(meses.length).fill(0));
 
-  const id = localStorage.getItem("user");
   const [exps, setExps] = useState<Expense[]>(sumAllExpenses(Number(id), fecha.getMonth()));
+  
+  const [anyElement, setAnyElement] = useState<boolean>(sumAllExpenses(Number(id), fecha.getMonth()).length > 0);
 
   useEffect(() => {
     const id = localStorage.getItem("user");
@@ -409,8 +413,8 @@ function Dashboard() {
             typeEdit={typeEdit} setTypeEdit={setTypeEdit} setPasswordChang={setPasswordChang} disabledName={disabledName}
             handleProfile={handleProfile} success={success} setSuccess={setSuccess} errorPass={errorPass} setErrorPass={setErrorPass}/>
 
-            {onSight && <ExpenseDate onSight={onSight} dateSel={dateSel} setOnSight={setOnSight} setDateSel={setDateSel} budRest={budRest} setBudRest={setBudRest} setSelected={setSelected} selected={selected} exps={exps}/>}
-            {selected[1] && <AddExpense budRest={budRest} setBudRest={setBudRest} rest={rest} setRest={setRest} exps={exps} setExps={setExps}/>}
+            {onSight && <ExpenseDate onSight={onSight} dateSel={dateSel} setOnSight={setOnSight} setDateSel={setDateSel} budRest={budRest} setBudRest={setBudRest} setSelected={setSelected} selected={selected} exps={exps} anyElement={anyElement}/>}
+            {selected[1] && <AddExpense budRest={budRest} setBudRest={setBudRest} rest={rest} setRest={setRest} exps={exps} setExps={setExps} setAnyElement={setAnyElement}/>}
           </div>  
       </div>
     </div>
@@ -539,7 +543,8 @@ type BudPass = {
   rest: number[],
   setRest: (value: number[]) => void,
   exps: Expense[],
-  setExps: (value: Expense[]) => void
+  setExps: (value: Expense[]) => void,
+  setAnyElement: (value: boolean) => void
 }
 
 type TableExpp = {
@@ -548,7 +553,7 @@ type TableExpp = {
   exps: Expense[]
 }
 
-function AddExpense({budRest, setBudRest, rest, setRest, exps, setExps}: BudPass) {
+function AddExpense({budRest, setBudRest, rest, setRest, exps, setExps, setAnyElement}: BudPass) {
   const [daysMonth, setDaysMonth] = useState<Category[]>(Array());
 
   const [queryTitle, setQueryTitle] = useState<string>("");
@@ -614,6 +619,7 @@ function AddExpense({budRest, setBudRest, rest, setRest, exps, setExps}: BudPass
       setBudRest(tempBud);
       console.log(setExps);
       setExps(sumAllExpenses(id, date.getMonth()));
+      setAnyElement(true)
     } 
 
     const newRest: number[] = [...rest];
@@ -719,8 +725,7 @@ function CustomSelect({ options, value, onChange, enun}: SelectProps) {
   );
 }
 
-function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOnSight, onSight, exps}: DateProp) {
-
+function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOnSight, onSight, exps, anyElement}: DateProp) {
 
   let year: number | string = "Error";
   let month: number | string = "Error";
@@ -804,7 +809,10 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
         </div>
 
         <div className="contentBills">
-          {expss}
+          <div className="searchBar">
+            <input placeholder="Realiza una busqueda" className='searchInput' type="text"/>
+          </div>
+          {anyElement ? expss : <label className="exisLabel"> Enhorabuena, no hay gastos! </label>}
         </div>
       </div>
     </div>
@@ -812,7 +820,6 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
 }
 
 function TableExp({budRest, setBudRest, exps}: TableExpp) {
-
   return(
     <div className="STContainer">
           <table className="infoTable">
