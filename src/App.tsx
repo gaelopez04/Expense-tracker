@@ -725,7 +725,37 @@ function CustomSelect({ options, value, onChange, enun}: SelectProps) {
   );
 }
 
+type check = {
+  value: boolean[],
+  onChange: (value: boolean[]) => void,
+  index: number
+}
+
+function DotCheck({value, onChange, index}: check) {
+  function handleChange() {
+    const newValue = [...value];
+    newValue[index] = !newValue[index]
+    onChange(newValue);
+
+  }
+  return(
+    <div className={value[index] ? 'checkBox sel' : 'checkBox'} onClick={handleChange}>
+    </div>
+  );
+}
+
 function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOnSight, onSight, exps, anyElement}: DateProp) {
+
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [check, setCheck] = useState<boolean[]>(Array(exps.length).fill(false));
+
+  const filters: Category[] = [
+    {value: "exp", label: "Costoso"},
+    {value: "cheap", label: "Barato"},
+    {value: "cat", label: "Categoria"},
+    {value: "date", label: "Fecha"},
+    {value: "alf", label: "Alfabeticamente"}
+  ];
 
   let year: number | string = "Error";
   let month: number | string = "Error";
@@ -782,7 +812,7 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
   const expss = exps.map((e, i) => {
     return(
       <div className="expenseDiv" key={i}>
-        <input type="checkbox"/>
+        <DotCheck value={check} onChange={setCheck} index={i}/>
         <label className="titleExpense"> {e.title} </label>
         <label className="amountExpense"> {e.amount} </label>
       </div>
@@ -811,6 +841,15 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
         <div className="contentBills">
           <div className="searchBar">
             <input placeholder="Realiza una busqueda" className='searchInput' type="text"/>
+            <div className='selectFilter'>
+              <CustomSelect options={filters} value={selectedCategory} onChange={setSelectedCategory} enun='Filtrar'/>
+            </div>
+            
+            {check.includes(true) && <div className='editDelContainer'>
+              <img className='delImg' src='public\editar.png'/>
+              <img className='delImg' src='public\borrar.png'/>
+            </div>}
+            
           </div>
           {anyElement ? expss : <label className="exisLabel"> Enhorabuena, no hay gastos! </label>}
         </div>

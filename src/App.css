@@ -299,7 +299,7 @@ html, body {
         transform: translateX(-1600px);
     }
     to {
-        transform: translateX(opx);
+        transform: translateX(0px);
     }
 }
 
@@ -394,6 +394,64 @@ html, body {
     padding-bottom: 15px;
     padding-top: 10px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+
+}
+
+.editDelContainer {
+    display: flex;
+    flex-direction: row;
+    margin-left: auto;
+    gap: 10px;
+    animation: init_edit 0.4s ease;
+    z-index: 0;
+}
+
+@keyframes init_edit {
+    from {
+        opacity: 0;
+    }   
+    to {
+        opacity: 1;
+    }
+}
+
+.selectFilter {
+    margin-left: 2%;
+    width: 100%;
+}
+
+.delImg {
+    width: 32px;
+    height: 32px;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+}
+
+.checkBox {
+    width: 11px;
+    height: 11px;
+    border: 1px solid;
+    border-radius: 2px;
+    background-color: white;
+    align-content: center;
+    align-self: center;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+}
+
+.checkBox:hover {
+    transform: scale(1.04);
+}
+
+.checkBox.sel {
+    background-color: rgb(3, 218, 3);
+    border: 1px solid rgb(3, 218, 3);
+}
+
+.delImg:hover {
+    transform: scale(1.05);
+}
+
+.delImg:active {
+    transform: scale(1);
 }
 
 .searchInput {
@@ -401,7 +459,8 @@ html, body {
     height: 25px;
     border-bottom: 1px solid grey;
     outline: none;
-    width: 20%;
+    width: 100%;
+    max-width: 250px;
     background-color: rgb(233, 233, 233);
     padding-left: 1px;
 }
