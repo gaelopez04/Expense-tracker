@@ -416,7 +416,15 @@ html, body {
 }
 
 .selectFilter {
+    display: flex;
+    flex: row;
     margin-left: 2%;
+    width: 100%;
+}
+
+.filterDate {
+    display: flex;
+    flex: row;
     width: 100%;
 }
 
