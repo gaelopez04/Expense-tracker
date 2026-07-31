@@ -746,8 +746,53 @@ function DotCheck({value, onChange, index}: check) {
 
 function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOnSight, onSight, exps, anyElement}: DateProp) {
 
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedCatt, setSelectedCatt] = useState<Category | null>(null);
   const [check, setCheck] = useState<boolean[]>(Array(exps.length).fill(false));
+  const [selectedBool, setSelectedBool] = useState<boolean[]>(Array(2).fill(false));
+
+  const [selectedCat, setSelectedCat] = useState<Category | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<Category | null>(null);
+  const [selectedDay, setSelectedDay] = useState<Category | null>(null);
+  const [daysMonth, setDaysMonth] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const newSelectedBool: boolean[] = Array(2).fill(false);
+
+    console.log(selectedCatt);
+    if (selectedCatt?.value === "cat") {
+      newSelectedBool[0] = true;
+    } else if (selectedCatt?.value === "date") {
+      newSelectedBool[1] = true;
+    }
+    console.log(newSelectedBool);
+    setSelectedBool(newSelectedBool);
+  }, [selectedCatt]);
+
+  const categories: Category[] = [
+    { value: "transport", label: "Transporte" },
+    { value: "shop", label: "Compras" },
+    { value: "enter", label: "Entretenimiento" },
+    { value: "food", label: "Alimento" },
+    { value: "health", label: "Salud" },
+    { value: "saving", label: "Ahorros" },
+    { value: "bill", label: "Servicios" },
+    { value: "other", label: "Otro" },
+  ];
+
+  const months: Category[] = [
+    {value: "0", label: "Enero"},
+    {value: "1", label: "Febrero"},
+    {value: "2", label: "Marzo"},
+    {value: "3", label: "Abril"},
+    {value: "4", label: "Mayo"},
+    {value: "5", label: "Junio"},
+    {value: "6", label: "Julio"},
+    {value: "7", label: "Agosto"},
+    {value: "8", label: "Septiembre"},
+    {value: "9", label: "Octubre"},
+    {value: "10", label: "Noviembre"},
+    {value: "11", label: "Diciembre"},
+  ];
 
   const filters: Category[] = [
     {value: "exp", label: "Costoso"},
@@ -776,6 +821,23 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
     month = meses[dateSel.getMonth()];
     dayName = daysOfWeek[dateSel.getDay()];
     day = dateSel.getDate();
+  }
+
+  function handleMonthDays(category: Category | null) {
+    console.log("Nuevo mes seleccionado:" + category);
+    setSelectedMonth(category);
+    setDaysMonth([]);
+    let newDaysMonth: Category[] = [];
+    const num: number = Number(category?.value ?? 0);
+    const days: number = new Date(fecha.getFullYear(), num + 1, 0).getDate();
+
+      console.log(days);
+    for (let i = 1; i <= days; ++i) {
+      const cat: Category = {value: String(i) + "_", label: String(i)};
+      newDaysMonth.push(cat);
+    }
+
+    setDaysMonth(newDaysMonth);
   }
 
   //  function handleSelected(sel: number) {
@@ -814,7 +876,10 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
       <div className="expenseDiv" key={i}>
         <DotCheck value={check} onChange={setCheck} index={i}/>
         <label className="titleExpense"> {e.title} </label>
-        <label className="amountExpense"> {e.amount} </label>
+        <label className="dateExpense"> {meses[e.date.getMonth()]}, {e.date.getDate()}  </label>
+        <label className="amountExpense">
+          <span className="amountPill">$ {e.amount}</span>
+        </label>
       </div>
     );
   });
@@ -842,7 +907,14 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
           <div className="searchBar">
             <input placeholder="Realiza una busqueda" className='searchInput' type="text"/>
             <div className='selectFilter'>
-              <CustomSelect options={filters} value={selectedCategory} onChange={setSelectedCategory} enun='Filtrar'/>
+              <CustomSelect options={filters} value={selectedCatt} onChange={setSelectedCatt} enun='Filtrar'/>
+              {selectedBool[0] && <CustomSelect options={categories} value={selectedCat} onChange={setSelectedCat} enun='Categoria'/>}
+              {selectedBool[1] &&
+              <div className='filterDate'>
+                <CustomSelect options={months} value={selectedMonth} onChange={handleMonthDays} enun='Mes'/>
+                <CustomSelect options={daysMonth} value={selectedDay} onChange={setSelectedDay} enun='Dia'/>
+              </div>  
+              }
             </div>
             
             {check.includes(true) && <div className='editDelContainer'>
@@ -874,9 +946,9 @@ function TableExp({budRest, setBudRest, exps}: TableExpp) {
 
             <tbody>
               <tr>
-                <td> {budRest.amount} </td>
-                <td> {budRest.rest} </td>
-                <td> {exps.reduce((a, b) => a + b.amount, 0)} </td>
+                <td> $ {budRest.amount} </td>
+                <td> $ {budRest.rest} </td>
+                <td> $ {exps.reduce((a, b) => a + b.amount, 0)} </td>
               </tr>
             </tbody>
           </table>
@@ -931,8 +1003,8 @@ function BudgetDate({onClickCal, setDisabledIn, budget, onMonthSelect, setDateSe
       <div className="monthDiv" key={m}>
         <div className={disabledMonth[i] ? "monthDivCont disabled" : "monthDivCont"} onClick={() => handleClick(i)}>
           <label className="monthLabel"> {m} </label>
-          <label className="monthBudget"> Pres: {budget[i]} </label>
-          <label className="monthMon"> Res: {rest[i]} </label>
+          <label className="monthBudget"> Pres: $ {budget[i]} </label>
+          <label className="monthMon"> Res: $ {rest[i]} </label>
           <button className="monthButton"> v </button>
         </div>
 
