@@ -695,7 +695,6 @@ type SelectProps = {
 function CustomSelect({ options, value, onChange, enun}: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  console.log("ENUNCIADO: " + enun);
   return (
     <div className="customSelect">
       <button
@@ -877,7 +876,10 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
       <div className="expenseDiv" key={i}>
         <DotCheck value={check} onChange={setCheck} index={i}/>
         <label className="titleExpense"> {e.title} </label>
-        <label className="amountExpense"> {e.amount} </label>
+        <label className="dateExpense"> {meses[e.date.getMonth()]}, {e.date.getDate()}  </label>
+        <label className="amountExpense">
+          <span className="amountPill">$ {e.amount}</span>
+        </label>
       </div>
     );
   });
@@ -944,9 +946,9 @@ function TableExp({budRest, setBudRest, exps}: TableExpp) {
 
             <tbody>
               <tr>
-                <td> {budRest.amount} </td>
-                <td> {budRest.rest} </td>
-                <td> {exps.reduce((a, b) => a + b.amount, 0)} </td>
+                <td> $ {budRest.amount} </td>
+                <td> $ {budRest.rest} </td>
+                <td> $ {exps.reduce((a, b) => a + b.amount, 0)} </td>
               </tr>
             </tbody>
           </table>
@@ -1001,8 +1003,8 @@ function BudgetDate({onClickCal, setDisabledIn, budget, onMonthSelect, setDateSe
       <div className="monthDiv" key={m}>
         <div className={disabledMonth[i] ? "monthDivCont disabled" : "monthDivCont"} onClick={() => handleClick(i)}>
           <label className="monthLabel"> {m} </label>
-          <label className="monthBudget"> Pres: {budget[i]} </label>
-          <label className="monthMon"> Res: {rest[i]} </label>
+          <label className="monthBudget"> Pres: $ {budget[i]} </label>
+          <label className="monthMon"> Res: $ {rest[i]} </label>
           <button className="monthButton"> v </button>
         </div>
 

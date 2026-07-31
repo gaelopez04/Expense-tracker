@@ -487,16 +487,50 @@ html, body {
 .expenseDiv {
     display: flex;
     flex-direction: row;
+    align-items: center;
     padding: 8px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
 }
+
+.expenseDiv:hover {
+    transform: scale(1.007);
+    background-color: rgb(228, 228, 228);
+    border-radius: 10px;
+}
+
+.expenseDiv:active {
+    transform: scale(1);
+    background-color: rgb(228, 228, 228);
+    border-radius: 10px;
+}
+
 
 .titleExpense {
     margin-left: 10%;
+    flex: 2;
+    text-align: left;
+}
+
+.dateExpense {
+    flex: 1;
+    text-align: center;
+    color: rgb(121, 121, 121);
+    font-weight: 400;
+    font-style: italic;
 }
 
 .amountExpense {
-    margin-left: auto;
+    flex: 1;
+    text-align: right;
+}
+
+.amountPill {
+    display: inline-block;
+    padding: 1px 6px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background-color: rgb(176,242,194);
 }
 
 .informationBill {
