@@ -484,13 +484,19 @@ html, body {
     font-style: italic;
 }
 
+.expenseWrapper {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
 .expenseDiv {
     display: flex;
     flex-direction: row;
     align-items: center;
     padding: 8px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+    cursor: pointer;
 }
 
 .expenseDiv:hover {
@@ -523,6 +529,7 @@ html, body {
 .amountExpense {
     flex: 1;
     text-align: right;
+    color: rgb(104, 103, 103);
 }
 
 .amountPill {
@@ -531,6 +538,51 @@ html, body {
     border: 1px solid transparent;
     border-radius: 7px;
     background-color: rgb(176,242,194);
+}
+
+.arrowLabel {
+    flex: 1;
+    text-align: right;
+   
+}
+
+.arrowPill {
+    transform: rotate(-90deg);
+    transition: transform .2s ease;
+    display: inline-block;
+}
+
+.arrowPill.open {
+    transform: rotate(0deg);
+}
+
+.expenseDetail {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    background-color: rgb(243, 243, 243);
+    border-radius: 0 0 10px 10px;
+    padding: 0 12px;
+}
+
+.expenseDetail.open {
+    max-height: 300px;
+    padding: 12px;
+}
+
+.expenseDetailRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    color: rgb(104, 103, 103);
+    font-size: 14px;
+}
+
+.expenseDetailLabel {
+    font-weight: 500;
+    color: rgb(80, 80, 80);
 }
 
 .informationBill {
