@@ -754,6 +754,11 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
   const [selectedMonth, setSelectedMonth] = useState<Category | null>(null);
   const [selectedDay, setSelectedDay] = useState<Category | null>(null);
   const [daysMonth, setDaysMonth] = useState<Category[]>([]);
+  const [isSelectedExp, setIsSelectedExp] = useState<boolean[]>(Array(exps.length).fill(false));
+  // const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+
+  const [queryTitle, setQueryTitle] = useState<string>("");
+  const [filteredExps, setFilteredExps] = useState<Expense[]>(exps);
 
   useEffect(() => {
     const newSelectedBool: boolean[] = Array(2).fill(false);
@@ -871,15 +876,50 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
 
   }
 
-  const expss = exps.map((e, i) => {
+  function handleIsSelected(id: number) {
+    const newSelectedExp: boolean[] = Array(exps.length).fill(false);
+    newSelectedExp[id] = !isSelectedExp[id];
+    setIsSelectedExp(newSelectedExp);
+  }
+
+  useEffect(() => {
+    if (queryTitle === "") {
+      setFilteredExps([...exps]);
+    } else {
+      const newFilteredExps = exps.filter((e) => e.title.toLocaleLowerCase().startsWith(queryTitle.toLocaleLowerCase()));
+      setFilteredExps(newFilteredExps);
+    }
+  }, [queryTitle]);
+
+  const expss = filteredExps.map((e, i) => {
     return(
-      <div className="expenseDiv" key={i}>
-        <DotCheck value={check} onChange={setCheck} index={i}/>
-        <label className="titleExpense"> {e.title} </label>
-        <label className="dateExpense"> {meses[e.date.getMonth()]}, {e.date.getDate()}  </label>
-        <label className="amountExpense">
-          <span className="amountPill">$ {e.amount}</span>
-        </label>
+      <div className="expenseWrapper">
+        <div className="expenseDiv" key={i} onClick={() => handleIsSelected(i)}>
+          <DotCheck value={check} onChange={setCheck} index={i}/>
+          <label className="titleExpense"> {e.title} </label>
+          <label className="dateExpense"> {meses[e.date.getMonth()]}, {e.date.getDate()}  </label>
+          <label className="amountExpense">
+            <span className="amountPill">$ {e.amount}</span>
+          </label>
+          <label className="arrowLabel"> 
+            <span className={isSelectedExp[i] ? "arrowPill open" : "arrowPill"}> ▼ </span>
+            </label>
+        </div>
+
+        <div className={isSelectedExp[i] ? "expenseDetail open" : "expenseDetail"}>
+          <div className="expenseDetailRow">
+            <span className="expenseDetailLabel">Categoría</span>
+            <span>{e.category}</span>
+          </div>
+          <div className="expenseDetailRow">
+            <span className="expenseDetailLabel">Descripción</span>
+            <span>{e.description}</span>
+          </div>
+          <div className="expenseDetailRow">
+            <span className="expenseDetailLabel">Monto</span>
+            <span className="amountPill">$ {e.amount}</span>
+          </div>
+        </div>
       </div>
     );
   });
@@ -905,7 +945,7 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
 
         <div className="contentBills">
           <div className="searchBar">
-            <input placeholder="Realiza una busqueda" className='searchInput' type="text"/>
+            <input placeholder="Realiza una busqueda" className='searchInput' type="text" value={queryTitle} onChange={(e) => setQueryTitle(e.target.value)}/>
             <div className='selectFilter'>
               <CustomSelect options={filters} value={selectedCatt} onChange={setSelectedCatt} enun='Filtrar'/>
               {selectedBool[0] && <CustomSelect options={categories} value={selectedCat} onChange={setSelectedCat} enun='Categoria'/>}
