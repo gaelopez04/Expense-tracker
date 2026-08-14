@@ -845,25 +845,6 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
     setDaysMonth(newDaysMonth);
   }
 
-  //  function handleSelected(sel: number) {
-  //   const newSelected: boolean[] = Array(3).fill(false);
-  //   newSelected[sel] = true;
-
-  //   if (sel == 2) {
-  //       if (!onSight) {
-  //         setOnSight(true);
-  //       } 
-        
-  //       const dateToday: Date | null = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
-  //       setDateSel(dateToday);
-  //   } else {
-  //     setOnSight(false);
-  //   } 
-
-  //   console.log(newSelected);
-  //   setSelected(newSelected);
-  // }
-
   function handleAdd() {
     const newSelected: boolean[] = Array(3).fill(false);
     newSelected[1] = true;
@@ -883,13 +864,28 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
   }
 
   useEffect(() => {
-    if (queryTitle === "") {
-      setFilteredExps([...exps]);
-    } else {
-      const newFilteredExps = exps.filter((e) => e.title.toLocaleLowerCase().startsWith(queryTitle.toLocaleLowerCase()));
-      setFilteredExps(newFilteredExps);
+    let result = [...exps];
+    if (queryTitle !== "") {
+      result = result.filter((e) => e.title.toLocaleLowerCase().startsWith(queryTitle));
     }
-  }, [queryTitle]);
+
+    if (selectedBool[0] && selectedCat) {
+      result = result.filter((e) => e.category === selectedCat.value);
+    }
+
+    if (selectedBool[1] && selectedMonth && selectedDay) {
+      result = result.filter((e) => e.date.getMonth() === Number(selectedMonth.value) && e.date.getDate() === Number(selectedDay.label));
+    }
+
+    if (selectedCatt?.value === "exp") {
+      result = [...result].sort((a,b) => b.amount - a.amount);
+    } else if (selectedCatt?.value === "cheap") {
+      result = [...result].sort((a,b) => a.amount - b.amount);
+    } else if (selectedCatt?.value === "alf") {
+      result = [...result].sort((a,b) => a.title.localeCompare(b.title));
+    }
+    setFilteredExps(result);
+  }, [exps, queryTitle, selectedCatt, selectedMonth, selectedDay, selectedCat, selectedBool]);
 
   const expss = filteredExps.map((e, i) => {
     return(
