@@ -105,7 +105,16 @@ type DateProp = {
   rest: number[],
   setRest: (value: number[]) => void,
   exps: Expense[],
+  setExps: (value: Expense[]) => void,
   anyElement: boolean
+};
+
+type HeaderDashProps = {
+  setDateSel: (value: Date | null) => void,
+  setOnSight: (value: boolean) => void,
+  setBudRest: (value: Budget) => void,
+  rest: number[],
+  setRest: (value: number[]) => void,
 };
 
 const meses: string[] = [
@@ -413,7 +422,7 @@ function Dashboard() {
             typeEdit={typeEdit} setTypeEdit={setTypeEdit} setPasswordChang={setPasswordChang} disabledName={disabledName}
             handleProfile={handleProfile} success={success} setSuccess={setSuccess} errorPass={errorPass} setErrorPass={setErrorPass}/>
 
-            {onSight && <ExpenseDate onSight={onSight} dateSel={dateSel} setOnSight={setOnSight} setDateSel={setDateSel} budRest={budRest} setBudRest={setBudRest} setSelected={setSelected} selected={selected} exps={exps} anyElement={anyElement}/>}
+            {onSight && <ExpenseDate onSight={onSight} dateSel={dateSel} setOnSight={setOnSight} setDateSel={setDateSel} budRest={budRest} setBudRest={setBudRest} setSelected={setSelected} selected={selected} exps={exps} setExps={setExps} anyElement={anyElement} rest={rest} setRest={setRest}/>}
             {selected[1] && <AddExpense budRest={budRest} setBudRest={setBudRest} rest={rest} setRest={setRest} exps={exps} setExps={setExps} setAnyElement={setAnyElement}/>}
           </div>  
       </div>
@@ -421,8 +430,8 @@ function Dashboard() {
   );
 }
 
-function HeaderDash({setDateSel, setOnSight, setBudRest, rest, setRest}: DateProp) {
-  const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth());
+function HeaderDash({setDateSel, setOnSight, setBudRest, rest, setRest}: HeaderDashProps) {
+  const currentMonth = new Date().getMonth();
   const [onClickCal, setOnClickCal] = useState<string>("calendarBudget");
   const [queryBud, setQueryBud] = useState<string>("");
   const [disabledIn, setDisabledIn] = useState<boolean>(false);
@@ -491,7 +500,6 @@ function HeaderDash({setDateSel, setOnSight, setBudRest, rest, setRest}: DatePro
       newBud[selectedMonth] = amount;
       setBudget(newBud);
       setQueryBud("");
-      console.log(budgets);
 
       if (fecha.getMonth() == selectedMonth) {
         
@@ -549,7 +557,6 @@ type BudPass = {
 
 type TableExpp = {
   budRest: Budget,
-  setBudRest: (value: Budget) => void,
   exps: Expense[]
 }
 
@@ -590,14 +597,12 @@ function AddExpense({budRest, setBudRest, rest, setRest, exps, setExps, setAnyEl
   ];
 
   function handleMonthDays(category: Category | null) {
-    console.log("Nuevo mes seleccionado:" + category);
     setSelectedMonth(category);
     setDaysMonth([]);
     let newDaysMonth: Category[] = [];
     const num: number = Number(category?.value ?? 0);
     const days: number = new Date(fecha.getFullYear(), num + 1, 0).getDate();
 
-      console.log(days);
     for (let i = 1; i <= days; ++i) {
       const cat: Category = {value: String(i) + "_", label: String(i)};
       newDaysMonth.push(cat);
@@ -617,7 +622,6 @@ function AddExpense({budRest, setBudRest, rest, setRest, exps, setExps, setAnyEl
       const newBudRest = getBudget(Number(id), date.getMonth());
       const tempBud = {id: newBudRest.id, id_user: newBudRest.id_user, amount: newBudRest.amount, month: newBudRest.month, rest: newBudRest.rest};
       setBudRest(tempBud);
-      console.log(setExps);
       setExps(sumAllExpenses(id, date.getMonth()));
       setAnyElement(true)
     } 
@@ -632,6 +636,8 @@ function AddExpense({budRest, setBudRest, rest, setRest, exps, setExps, setAnyEl
     setSelectedCategory(null);
     setSelectedMonth(null);
     setSelectedDay(null);
+
+    console.log(expenses);
   }
 
   return(
@@ -641,7 +647,7 @@ function AddExpense({budRest, setBudRest, rest, setRest, exps, setExps, setAnyEl
       </div>
 
       <div className="stateTag">
-        <TableExp budRest={budRest} setBudRest={setBudRest} exps={exps}/>
+        <TableExp budRest={budRest} exps={exps}/>
       </div>
 
       <div className="statsTag">
@@ -656,17 +662,17 @@ function AddExpense({budRest, setBudRest, rest, setRest, exps, setExps, setAnyEl
 
           <div className="informationBill">
             <label className="addTitle"> Ingresa el titulo * </label>
-            <input placeholder="ingresa el titulo" className="addInput" value={queryTitle} onChange={(e) => setQueryTitle(e.target.value)}/>
+            <input placeholder="ingresa el titulo" className="searchInput" value={queryTitle} onChange={(e) => setQueryTitle(e.target.value)}/>
 
             <label className="addTitle"> Ingresa la cantidad * </label>
-            <input placeholder="ingresa la cantidad" className="addInput" type="number" value={queryAmount} onChange={(e) => setQueryAmount(Number(e.target.value))}/>
+            <input placeholder="ingresa la cantidad" className="searchInput" type="number" value={queryAmount} onChange={(e) => setQueryAmount(Number(e.target.value))}/>
 
             <label className="addTitle"> Selecciona una categoria * </label>
             <CustomSelect options={categories} value={selectedCategory} onChange={setSelectedCategory} enun={"Selecciona una categoria"}/>
             
             
             <label className="addTitle"> Ingresa la descripción </label>
-            <textarea className="addArea" value={queryDes} onChange={(e) => setQueryDes(e.target.value)}/>
+            <textarea className="searchInput" value={queryDes} onChange={(e) => setQueryDes(e.target.value)}/>
 
             <label className="addTitle"> Ingresa la fecha * </label>
             <div className="dateContainer">
@@ -732,19 +738,20 @@ type check = {
 }
 
 function DotCheck({value, onChange, index}: check) {
-  function handleChange() {
+  function handleChange(event: React.MouseEvent<HTMLDivElement>) {
+    event.stopPropagation();
     const newValue = [...value];
-    newValue[index] = !newValue[index]
+    newValue[index] = !newValue[index];
     onChange(newValue);
-
   }
+
   return(
     <div className={value[index] ? 'checkBox sel' : 'checkBox'} onClick={handleChange}>
     </div>
   );
 }
 
-function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOnSight, onSight, exps, anyElement}: DateProp) {
+function ExpenseDate({dateSel, budRest, setBudRest, setSelected, setOnSight, onSight, exps, setExps, anyElement}: DateProp) {
 
   const [selectedCatt, setSelectedCatt] = useState<Category | null>(null);
   const [check, setCheck] = useState<boolean[]>(Array(exps.length).fill(false));
@@ -758,18 +765,23 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
   // const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
 
   const [queryTitle, setQueryTitle] = useState<string>("");
+  const [localExps, setLocalExps] = useState<Expense[]>(exps);
   const [filteredExps, setFilteredExps] = useState<Expense[]>(exps);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [editDraft, setEditDraft] = useState<Expense | null>(null);
+
+  useEffect(() => {
+    setLocalExps(exps);
+  }, [exps]);
 
   useEffect(() => {
     const newSelectedBool: boolean[] = Array(2).fill(false);
 
-    console.log(selectedCatt);
     if (selectedCatt?.value === "cat") {
       newSelectedBool[0] = true;
     } else if (selectedCatt?.value === "date") {
       newSelectedBool[1] = true;
     }
-    console.log(newSelectedBool);
     setSelectedBool(newSelectedBool);
   }, [selectedCatt]);
 
@@ -807,7 +819,6 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
     {value: "alf", label: "Alfabeticamente"}
   ];
 
-  let year: number | string = "Error";
   let month: number | string = "Error";
   let dayName: string = "Error";
   let day: number | string = "Error";
@@ -822,21 +833,18 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
   ];
 
   if (dateSel) {
-    year = dateSel.getFullYear();
     month = meses[dateSel.getMonth()];
     dayName = daysOfWeek[dateSel.getDay()];
     day = dateSel.getDate();
   }
 
   function handleMonthDays(category: Category | null) {
-    console.log("Nuevo mes seleccionado:" + category);
     setSelectedMonth(category);
     setDaysMonth([]);
     let newDaysMonth: Category[] = [];
     const num: number = Number(category?.value ?? 0);
     const days: number = new Date(fecha.getFullYear(), num + 1, 0).getDate();
 
-      console.log(days);
     for (let i = 1; i <= days; ++i) {
       const cat: Category = {value: String(i) + "_", label: String(i)};
       newDaysMonth.push(cat);
@@ -864,13 +872,13 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
   }
 
   useEffect(() => {
-    let result = [...exps];
+    let result = [...localExps];
     if (queryTitle !== "") {
       result = result.filter((e) => e.title.toLocaleLowerCase().startsWith(queryTitle));
     }
 
     if (selectedBool[0] && selectedCat) {
-      result = result.filter((e) => e.category === selectedCat.value);
+      result = result.filter((e) => e.category === selectedCat.label);
     }
 
     if (selectedBool[1] && selectedMonth && selectedDay) {
@@ -885,24 +893,99 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
       result = [...result].sort((a,b) => a.title.localeCompare(b.title));
     }
     setFilteredExps(result);
-  }, [exps, queryTitle, selectedCatt, selectedMonth, selectedDay, selectedCat, selectedBool]);
+  }, [localExps, queryTitle, selectedCatt, selectedMonth, selectedDay, selectedCat, selectedBool]);
+
+  useEffect(() => {
+    setCheck(Array(localExps.length).fill(false));
+    setIsSelectedExp(Array(localExps.length).fill(false));
+  }, [localExps.length]);
+
+  function handleEditSelected() {
+    const selectedExpenseIndex = check.findIndex((isChecked) => isChecked);
+    if (selectedExpenseIndex === -1) return;
+
+    const selectedExpense = localExps[selectedExpenseIndex];
+    if (!selectedExpense) return;
+
+    setEditIndex(selectedExpenseIndex);
+    setEditDraft({ ...selectedExpense, date: new Date(selectedExpense.date) });
+  }
+
+  function handleEditDraftChange<K extends keyof Expense>(key: K, value: Expense[K]) {
+    setEditDraft((current) => {
+      if (!current) return current;
+      return { ...current, [key]: value };
+    });
+  }
+
+  function handleSaveEdit() {
+    if (editIndex === null || !editDraft) return;
+
+    const oldExpense = localExps[editIndex];
+    const amountDifference = oldExpense.amount - Number(editDraft.amount);
+
+    const updatedExps = localExps.map((expense, index) => {
+      if (index !== editIndex) return expense;
+
+      return {
+        ...expense,
+        ...editDraft,
+        amount: Number(editDraft.amount),
+        date: new Date(editDraft.date),
+      };
+    });
+
+    // Update the global expenses array
+    const expenseToUpdate = expenses.find((exp) => exp.id === oldExpense.id);
+    if (expenseToUpdate) {
+      expenseToUpdate.title = editDraft.title;
+      expenseToUpdate.category = editDraft.category;
+      expenseToUpdate.description = editDraft.description;
+      expenseToUpdate.amount = Number(editDraft.amount);
+      expenseToUpdate.date = new Date(editDraft.date);
+    }
+
+    setLocalExps(updatedExps);
+    setExps(updatedExps);
+    
+    // Update the remaining budget if the amount changed and it's in the current month
+    if (amountDifference !== 0 && editDraft.date.getMonth() === budRest.month) {
+      const newBudRest = { ...budRest, rest: budRest.rest + amountDifference };
+      setBudRest(newBudRest);
+    }
+    
+    setEditIndex(null);
+    setEditDraft(null);
+    setCheck(Array(updatedExps.length).fill(false));
+
+    console.log(expenses);
+  }
+
+  function handleCancelEdit() {
+    setEditIndex(null);
+    setEditDraft(null);
+  }
 
   const expss = filteredExps.map((e, i) => {
+    const expenseIndex = localExps.findIndex((expense) => expense.id === e.id);
+    const actualIndex = expenseIndex >= 0 ? expenseIndex : i;
+    const editingThisExpense = editIndex === actualIndex;
+
     return(
-      <div className="expenseWrapper">
-        <div className="expenseDiv" key={i} onClick={() => handleIsSelected(i)}>
-          <DotCheck value={check} onChange={setCheck} index={i}/>
+      <div className="expenseWrapper" key={e.id ?? `${e.title}-${actualIndex}`}>
+        <div className="expenseDiv" onClick={() => handleIsSelected(actualIndex)}>
+          <DotCheck value={check} onChange={setCheck} index={actualIndex}/>
           <label className="titleExpense"> {e.title} </label>
           <label className="dateExpense"> {meses[e.date.getMonth()]}, {e.date.getDate()}  </label>
           <label className="amountExpense">
             <span className="amountPill">$ {e.amount}</span>
           </label>
           <label className="arrowLabel"> 
-            <span className={isSelectedExp[i] ? "arrowPill open" : "arrowPill"}> ▼ </span>
+            <span className={isSelectedExp[actualIndex] ? "arrowPill open" : "arrowPill"}> ▼ </span>
             </label>
         </div>
 
-        <div className={isSelectedExp[i] ? "expenseDetail open" : "expenseDetail"}>
+        <div className={isSelectedExp[actualIndex] ? "expenseDetail open" : "expenseDetail"}>
           <div className="expenseDetailRow">
             <span className="expenseDetailLabel">Categoría</span>
             <span>{e.category}</span>
@@ -916,6 +999,89 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
             <span className="amountPill">$ {e.amount}</span>
           </div>
         </div>
+
+        {editingThisExpense && editDraft && (
+          <div className="expenseEdit">
+            <div className="expenseEditRow">
+              <span className="expenseDetailLabel">Título</span>
+              <input
+                className="searchInput expenseEditInput"
+                value={editDraft.title}
+                onChange={(event) => handleEditDraftChange("title", event.target.value)}
+              />
+            </div>
+
+            <div className="expenseEditRow">
+              <span className="expenseDetailLabel">Categoría</span>
+              <input
+                className="searchInput expenseEditInput"
+                value={editDraft.category}
+                onChange={(event) => handleEditDraftChange("category", event.target.value)}
+              />
+            </div>
+
+            <div className="expenseEditRow">
+              <span className="expenseDetailLabel">Descripción</span>
+              <input
+                className="searchInput expenseEditInput"
+                value={editDraft.description}
+                onChange={(event) => handleEditDraftChange("description", event.target.value)}
+              />
+            </div>
+
+            <div className="expenseEditRow">
+              <span className="expenseDetailLabel">Fecha</span>
+              <div className="expenseEditDate">
+                <CustomSelect
+                  options={months}
+                  value={months.find((monthOption) => Number(monthOption.value) === editDraft.date.getMonth()) ?? null}
+                  onChange={(selectedMonthOption) => {
+                    if (!selectedMonthOption) return;
+                    const nextDate = new Date(editDraft.date);
+                    nextDate.setMonth(Number(selectedMonthOption.value));
+                    handleEditDraftChange("date", nextDate);
+                  }}
+                  enun="Mes"
+                />
+                <CustomSelect
+                  options={Array.from({ length: new Date(editDraft.date.getFullYear(), editDraft.date.getMonth() + 1, 0).getDate() }, (_, index) => ({
+                    value: String(index + 1) + "_",
+                    label: String(index + 1)
+                  }))}
+                  value={Array.from({ length: new Date(editDraft.date.getFullYear(), editDraft.date.getMonth() + 1, 0).getDate() }, (_, index) => ({
+                    value: String(index + 1) + "_",
+                    label: String(index + 1)
+                  })).find((dayOption) => Number(dayOption.label) === editDraft.date.getDate()) ?? null}
+                  onChange={(selectedDayOption) => {
+                    if (!selectedDayOption) return;
+                    const nextDate = new Date(editDraft.date);
+                    nextDate.setDate(Number(selectedDayOption.label));
+                    handleEditDraftChange("date", nextDate);
+                  }}
+                  enun="Dia"
+                />
+              </div>
+            </div>
+
+            <div className="expenseEditRow">
+              <span className="expenseDetailLabel">Monto</span>
+              <div className="expenseEditAmount">
+                <span className="amountPill">$</span>
+                <input
+                  className="searchInput expenseEditInput moneyInput"
+                  type="number"
+                  value={editDraft.amount}
+                  onChange={(event) => handleEditDraftChange("amount", Number(event.target.value) || 0)}
+                />
+              </div>
+            </div>
+
+            <div className="expenseEditActions">
+              <button type="button" className="expenseEditButton save" onClick={handleSaveEdit}>Guardar</button>
+              <button type="button" className="expenseEditButton cancel" onClick={handleCancelEdit}>Cancelar</button>
+            </div>
+          </div>
+        )}
       </div>
     );
   });
@@ -927,7 +1093,7 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
       </div>
 
       <div className="stateTag">
-        <TableExp budRest={budRest} setBudRest={setBudRest} exps={exps}/>
+        <TableExp budRest={budRest} exps={exps}/>
       </div>
 
       <div className="statsTag">
@@ -954,8 +1120,8 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
             </div>
             
             {check.includes(true) && <div className='editDelContainer'>
-              <img className='delImg' src='public\editar.png'/>
-              <img className='delImg' src='public\borrar.png'/>
+              <img className='delImg' src='public\editar.png' alt='Editar gasto' onClick={handleEditSelected} />
+              <img className='delImg' src='public\borrar.png' alt='Borrar gasto' />
             </div>}
             
           </div>
@@ -966,7 +1132,7 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, selected, setOn
   );
 }
 
-function TableExp({budRest, setBudRest, exps}: TableExpp) {
+function TableExp({budRest, exps}: TableExpp) {
   return(
     <div className="STContainer">
           <table className="infoTable">
@@ -993,8 +1159,6 @@ function TableExp({budRest, setBudRest, exps}: TableExpp) {
 }
 
 function BudgetDate({onClickCal, setDisabledIn, budget, onMonthSelect, setDateSel, setOnSight, rest}: calProp) {
-  const id = localStorage.getItem("user");
-
   const [divClick, setDivClick] = useState<boolean[]>(() => Array(meses.length).fill(false));
   const [daysMonth, setDaysMonth] = useState<ReactNode[]>([]);
 
@@ -1030,7 +1194,6 @@ function BudgetDate({onClickCal, setDisabledIn, budget, onMonthSelect, setDateSe
   function handleDay(month: number, day: number) {
     const date: Date | null = new Date(fecha.getFullYear(), month, day);
     setDateSel(date);
-    console.log(date);
     setOnSight(true);
   }
 
@@ -1222,7 +1385,7 @@ type optionsProp = {
   setOnSight: (value: boolean) => void
 };
 
-function OptionsSideDash({selected, setSelected, setDateSel, onSight, setOnSight}: optionsProp) {
+function OptionsSideDash({setSelected, setDateSel, onSight, setOnSight}: optionsProp) {
   const [isHover, setIsHover] = useState<boolean[]>(Array(3).fill(false));
 
   function handleHover(numberOp: number, hover: boolean) {
@@ -1246,7 +1409,6 @@ function OptionsSideDash({selected, setSelected, setDateSel, onSight, setOnSight
       setOnSight(false);
     } 
 
-    console.log(newSelected);
     setSelected(newSelected);
   }
 
@@ -1421,10 +1583,8 @@ function getBudgetsUser(id_user: number): Budget[] {
 }
 
 function containsMonth(id_user: number, month: number): boolean {
-  console.log(budgets);
   for (const budget of budgets) {
     if (budget.id_user == id_user) {
-      console.log(budget.id_user + " | " + id_user);
       if (budget.month == month) {
         return true;
       }
@@ -1445,7 +1605,6 @@ function getBudget(id_user: number, month: number): Budget {
 }
 
 function modifyBudget(id_user: number, month: number, amount: number): number {
-  console.log("Lo modifique");
   for (const budget of budgets) {
     if (budget.id_user == id_user) {
       if (budget.month == month) {
