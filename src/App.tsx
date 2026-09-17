@@ -2,175 +2,13 @@ import { useState, type ReactNode } from 'react'
 import { useNavigate, BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useEffect } from 'react'
 import './App.css'
-
-
-//TABLES
-type User = {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  created_at: string;
-};
-
-type Expense = {
-  id: number,
-  id_user: number,
-  title: string,
-  amount: number,
-  category: string,
-  description: string,
-  date: Date
-}
-
-type Budget = {
-  id: number,
-  id_user: number,
-  amount: number,
-  month: number,
-  rest: number
-}
-
-let accounts: User[] = [];
-let budgets: Budget[] = [];
-let expenses: Expense[] = [];
-
-accounts.push({id: 1, name: "Gael Lopez", email: "gael.lopez@prueba.com", password: "simonwe", created_at: new Date().toISOString()});
-
-console.log(accounts[0]);
-
-type emailProp = {
-  testEmail: (email: string) => boolean
-};
-
-type hideProp = {
-  onHide: () => void
-};
-
-type statusHideProp = {
-  hideStatus: boolean,
-  onProfile: () => void
-};
-
-type profileProp = {
-  onProfile: () => void
-  selected: boolean[],
-  setSelected: (value: boolean[]) => void,
-  setDateSel: (value: Date | null) => void,
-  setOnSight: (value: boolean) => void,
-  onSight?: boolean
-};
-
-type popOverProp = {
-  profile: boolean,
-  disabled: boolean,
-  passwordChang: boolean,
-  handleChangingPassword: () => void,
-  handleConfiContra: () => void,
-  handleRegresar: () => void,
-  query: string,
-  setQuery: (value: string) => void
-  userTemp: User,
-  typeEdit: string,
-  setTypeEdit: (value: string) => void,
-  setPasswordChang: (value: boolean) => void,
-  disabledName: boolean,
-  handleProfile: () => void,
-  success: string,
-  setSuccess: (value: string) => void,
-  errorPass: boolean,
-  setErrorPass: (value: boolean) => void
-};
-
-type calProp = {
-  onClickCal: string,
-  setDisabledIn: (value: boolean) => void,
-  budget: number[],
-  onMonthSelect: (monthIndex: number) => void,
-  setDateSel: (value: Date | null) => void,
-  setOnSight: (value: boolean) => void,
-  setBudRest?: (value: Budget) => void,
-  rest: number[],
-  exps: Expense[]
-};
-
-type DateProp = {
-  dateSel?: Date | null,
-  setOnSight: (value: boolean) => void,
-  setDateSel: (value: Date | null) => void,
-  onSight?: boolean,
-  budRest: Budget,
-  setBudRest: (value: Budget) => void,
-  setSelected: (value: boolean[]) => void,
-  selected: boolean[],
-  rest: number[],
-  setRest: (value: number[]) => void,
-  exps: Expense[],
-  setExps: (value: Expense[]) => void,
-  anyElement: boolean
-};
-
-type HeaderDashProps = {
-  setDateSel: (value: Date | null) => void,
-  setOnSight: (value: boolean) => void,
-  setBudRest: (value: Budget) => void,
-  rest: number[],
-  setRest: (value: number[]) => void,
-  exps: Expense[],
-};
-
-const meses: string[] = [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre"
-];
-
-const fecha = new Date();
-
-const expenseCategories: Category[] = [
-  { value: "transport", label: "Transporte" },
-  { value: "shop", label: "Compras" },
-  { value: "enter", label: "Entretenimiento" },
-  { value: "food", label: "Alimento" },
-  { value: "health", label: "Salud" },
-  { value: "saving", label: "Ahorros" },
-  { value: "bill", label: "Servicios" },
-  { value: "other", label: "Otro" },
-];
-
-const expenseMonths: Category[] = [
-  {value: "0", label: "Enero"},
-  {value: "1", label: "Febrero"},
-  {value: "2", label: "Marzo"},
-  {value: "3", label: "Abril"},
-  {value: "4", label: "Mayo"},
-  {value: "5", label: "Junio"},
-  {value: "6", label: "Julio"},
-  {value: "7", label: "Agosto"},
-  {value: "8", label: "Septiembre"},
-  {value: "9", label: "Octubre"},
-  {value: "10", label: "Noviembre"},
-  {value: "11", label: "Diciembre"},
-];
-
-const expenseFilters: Category[] = [
-  {value: "exp", label: "Costoso"},
-  {value: "cheap", label: "Barato"},
-  {value: "cat", label: "Categoria"},
-  {value: "date", label: "Fecha"},
-  {value: "alf", label: "Alfabeticamente"}
-];
-
-console.log(meses[fecha.getMonth()]); // Julio
+import type { Budget, Category, Expense, User } from './domain/models'
+import { expenseCategories, expenseFilters, expenseMonths, fecha, meses } from './domain/constants'
+import { expenses, containsMonth, createBudget, createExpense, getBudget, getUserByID, isPasswordCorrect, modifyBudget, modifyName, modifyPass, sumAllExpenses, deleteExpense } from './domain/store'
+import { verifyBudget } from './utils/validation'
+import { AuthLog as AuthLogPage, AuthSign as AuthSignPage } from './features/auth/AuthPages'
+import {Home} from './features/home'
+import type { CalendarProps as calProp, DateProps as DateProp, HeaderDashProps, HideProps as hideProp, PopOverProps as popOverProp, ProfileProps as profileProp, StatusHideProps as statusHideProp } from './types/componentProps'
 
 function App() {
 
@@ -182,8 +20,8 @@ function App() {
   return(
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={ <AuthLog testEmail={verifyEmail}/> }/>
-        <Route path="/signup" element={ <AuthSign testEmail={verifyEmail}/> }/>
+        <Route path="/login" element={ <AuthLogPage testEmail={verifyEmail}/> }/>
+        <Route path="/signup" element={ <AuthSignPage testEmail={verifyEmail}/> }/>
         <Route path="/dashboard" element={ <Dashboard/> }/>
       </Routes>
     </BrowserRouter>
@@ -191,162 +29,6 @@ function App() {
   
 }
 
-
-
-function AuthLog({testEmail}: emailProp) {
-  const navigate = useNavigate();
-  const [forgot, setForgot] = useState<boolean>(false);
-  const [queryEmail, setQueryEmail] = useState<string>("");
-  const [queryPass, setQueryPass] = useState<string>("");
-  const [dontExist, setDontExist] = useState<boolean>(false);
-  const [exist, setExist] = useState<boolean>(false);
-
-  function handleClick() {
-    setForgot(!forgot);
-  }
-
-  function handleLogin() {
-    let exist: boolean = false;
-    let isCorrectPass: boolean = false;
-    let id: number = 0;
-
-    if (testEmail(queryEmail)) {
-      for (const account of accounts) {
-        if (account.email == queryEmail) {
-          exist = true;
-          if (account.password == queryPass) {
-            isCorrectPass = true;
-            id = account.id;
-          }
-        }
-      }
-
-      if (exist && isCorrectPass) {
-        localStorage.setItem("user", String(id));
-        setExist(true);
-        navigate("/dashboard");
-      } else {
-        setExist(false);
-        setDontExist(true);
-      }
-    } else {
-      setDontExist(true);
-    }
-  }
-
-  if (forgot) {
-    return(
-      <>
-        <HeaderSide/>
-        <div className="whole2">
-          <div className="authDiv2">
-            <button className="passBack" onClick={() => setForgot(false)}> {`<`} </button>
-
-            <div className="authContainer2">
-              <div className="auth">
-                <label className="startLabel">Recuperacion</label>
-                <label className="signLabb"> Ingresa tu correo electronico para que te enviemos un codigo de seguridad </label>
-                <input className="authLog" placeholder="Ingresa tu correo"/>
-                <button className="authBut"> Recuperar cuenta </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  } else {
-    return(
-      <>
-        <HeaderSide/>
-        <div className="whole2">
-          <div className="authDiv1">
-            <div className="authContainer">
-              <div className="auth">
-                <label className="startLabel">Inicia sesion en Expense tracker</label>
-                {dontExist && <label className="errorLabel"> Las credenciales son incorrectas o no existen </label>}
-                <input className={dontExist ? "authLog dont" : exist ? "authLog exist" : "authLog"} placeholder="Ingresa tu correo" value={queryEmail} onChange={(e) => setQueryEmail(e.target.value)}/>
-                <input className={dontExist ? "authLog dont" : exist ? "authLog exist" : "authLog"} placeholder="Ingresa tu contraseña" value={queryPass} onChange={(e) => setQueryPass(e.target.value)} type="password"/>
-                <label className="authLab" onClick={handleClick}>¿Olvidaste tu contraseña? Click aqui.</label>
-                <button className="authBut" onClick={handleLogin}> Iniciar sesión </button>
-                <label className="authLab" onClick={() => navigate("/signup", {replace: true})}> ¿No tienes cuenta? Registrate aqui. </label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  
-}
-
-function AuthSign({testEmail}: emailProp) {
-  const navigate = useNavigate();
-  const [queryEmail, setQueryEmail] = useState<string>("");
-  const [queryPass, setQueryPass] = useState<string>("");
-  const [queryName, setQueryName] = useState<string>("");
-
-  const [valid, setValid] = useState<boolean>(true);
-  const [created, setCreated] = useState<boolean>(false);
-
-
-  function handleSignup() {
-    if (!testEmail(queryEmail) || !parsingPassword(queryPass) || !testName(queryName)) {
-      setValid(false);
-      setCreated(false);
-    } else {
-      createUser(queryName, queryEmail, queryPass);
-      console.log("Account created:");
-      console.log(accounts[accounts.length - 1]);
-      navigate("/login");
-      setValid(true);
-      setCreated(true);
-    }
-  }
-
-  return(
-    <>
-      <HeaderSide/>
-      <div className="whole2">
-        <div className="authDiv2">
-          <div className="authContainer">
-            <div className="auth">
-              <label className="startLabel">Registrate en Expense Tracker</label>
-              
-              <label className="signLab">Ingresa tu nombre completo</label>
-              {created && <label className="sucLabel"> Cuenta creada satisfactoriamente </label>}
-              {!valid && <label className="errorLabel"> Debe ser un nombre valido</label>}
-              <input className={testName(queryName) ? "authLog exist" : "authLog"} placeholder="Ingresa tu nombre completo" value={queryName} onChange={(e) => setQueryName(e.target.value)}/>
-
-              <label className="signLab">Ingresa tu correo</label>
-              {!valid && <label className="errorLabel"> Debe ser un correo valido</label>}
-              <input className={testEmail(queryEmail) ? "authLog exist" : "authLog"} placeholder="Ingresa tu correo eletronico" value={queryEmail} onChange={(e) => setQueryEmail(e.target.value)}/>
-
-              <label className="signLab">Ingresa tu contraseña</label>
-              {!valid && <label className="errorLabel"> Debe ser una contraseña igual o mayor a 8 caracteres y al menos una mayuscula</label>}
-              <input className={parsingPassword(queryPass) ? "authLog exist" : "authLog"} placeholder="Ingresa tu contraseña" value={queryPass} onChange={(e) => setQueryPass(e.target.value)} type="password"/>
-
-              <button className="authBut" onClick={handleSignup}> Registrarse </button>
-
-              <label className="authLab" onClick={() => navigate("/login", {replace: true})}> ¿Tienes cuenta? Inicia sesion aqui. </label>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-      
-  );
-}
-
-function HeaderSide() {
-  
-  return(
-    <div className="header">
-      <img className="themeH" src="public\darkmode.png"/>
-      <label className="nameLogoH"> EXPENSE TRACKER </label>
-    </div>
-  );
-}
 
 
 //DASHBOARD============================================================================================================
@@ -373,9 +55,15 @@ function Dashboard() {
   const [budRest, setBudRest] = useState<Budget>(getBudget(Number(id), fecha.getMonth()));
   const [rest, setRest] = useState<number[]>(() => Array(meses.length).fill(0));
 
-  const [exps, setExps] = useState<Expense[]>(sumAllExpenses(Number(id), fecha.getMonth()));
-  
-  const [anyElement, setAnyElement] = useState<boolean>(sumAllExpenses(Number(id), fecha.getMonth()).length > 0);
+  const [exps, setExps] = useState<Expense[]>(() => {
+    const currentUser = Number(localStorage.getItem("user") ?? -1);
+    return sumAllExpenses(currentUser, -1);
+  });
+
+  const [anyElement, setAnyElement] = useState<boolean>(() => {
+    const currentUser = Number(localStorage.getItem("user") ?? -1);
+    return sumAllExpenses(currentUser, -1).length > 0;
+  });
 
   useEffect(() => {
     const id = localStorage.getItem("user");
@@ -458,9 +146,10 @@ function Dashboard() {
             typeEdit={typeEdit} setTypeEdit={setTypeEdit} setPasswordChang={setPasswordChang} disabledName={disabledName}
             handleProfile={handleProfile} success={success} setSuccess={setSuccess} errorPass={errorPass} setErrorPass={setErrorPass}/>
 
+            {selected[0] && <Home/>}
             {onSight && <ExpenseDate onSight={onSight} dateSel={dateSel} setOnSight={setOnSight} setDateSel={setDateSel} budRest={budRest} setBudRest={setBudRest} setSelected={setSelected} selected={selected} exps={exps} setExps={setExps} anyElement={anyElement} rest={rest} setRest={setRest}/>}
             {selected[1] && <AddExpense budRest={budRest} setBudRest={setBudRest} rest={rest} setRest={setRest} exps={exps} setExps={setExps} setAnyElement={setAnyElement}/>}
-            {selected[3] && <ExpenseHistory/>}
+            {selected[3] && <ExpenseHistory exps={exps} setExps={setExps}/>}
           </div>  
       </div>
     </div>
@@ -576,12 +265,6 @@ function HeaderDash({setDateSel, setOnSight, setBudRest, rest, setRest, exps}: H
   );
 }
 
-type Category = {
-  value: string;
-  label: string;
-};
-
-
 type BudPass = {
   budRest: Budget,
   setBudRest: (value: Budget) => void,
@@ -636,9 +319,10 @@ function AddExpense({budRest, setBudRest, rest, setRest, exps, setExps, setAnyEl
       const newBudRest = getBudget(Number(id), date.getMonth());
       const tempBud = {id: newBudRest.id, id_user: newBudRest.id_user, amount: newBudRest.amount, month: newBudRest.month, rest: newBudRest.rest};
       setBudRest(tempBud);
-      setExps(sumAllExpenses(id, date.getMonth()));
-      setAnyElement(true)
-    } 
+    }
+
+    setExps(sumAllExpenses(id, -1));
+    setAnyElement(sumAllExpenses(id, -1).length > 0);
 
     const newRest: number[] = [...rest];
     newRest[date.getMonth()] = resTemp;
@@ -722,7 +406,6 @@ type ExpenseFilterPanelProps = {
   daysMonth: Category[],
   filters: Category[],
   check: boolean[],
-  handleEditSelected: () => void,
 };
 
 function ExpenseFilterPanel({
@@ -742,7 +425,6 @@ function ExpenseFilterPanel({
   daysMonth,
   filters,
   check,
-  handleEditSelected,
 }: ExpenseFilterPanelProps) {
   return (
     <div className="contentBills">
@@ -760,7 +442,6 @@ function ExpenseFilterPanel({
         </div>
         
         {check.includes(true) && <div className='editDelContainer'>
-          <img className='delImg' src='public\editar.png' alt='Editar gasto' onClick={handleEditSelected} />
           <img className='delImg' src='public\borrar.png' alt='Borrar gasto' />
         </div>}
       </div>
@@ -809,26 +490,190 @@ function CustomSelect({ options, value, onChange, enun}: SelectProps) {
 }
 
 type check = {
-  value: boolean[],
-  onChange: (value: boolean[]) => void,
-  index: number
+  value?: boolean[],
+  onChange?: (value: boolean[]) => void,
+  index?: number,
+  checked?: boolean,
+  onClick?: () => void,
 }
 
-function DotCheck({value, onChange, index}: check) {
+function DotCheck({ value, onChange, index, checked, onClick }: check) {
   function handleChange(event: React.MouseEvent<HTMLDivElement>) {
     event.stopPropagation();
+
+    if (onClick) {
+      onClick();
+      return;
+    }
+
+    if (!value || typeof index !== 'number' || !onChange) return;
+
     const newValue = [...value];
     newValue[index] = !newValue[index];
     onChange(newValue);
   }
 
+  const isSelected = checked ?? (typeof index === 'number' && Array.isArray(value) ? value[index] : false);
+
   return(
-    <div className={value[index] ? 'checkBox sel' : 'checkBox'} onClick={handleChange}>
+    <div
+      className={isSelected ? 'checkBox sel' : 'checkBox'}
+      onClick={(event) => {
+        event.stopPropagation();
+        handleChange(event);
+      }}
+    >
     </div>
   );
 }
 
-function ExpenseHistory() {
+type ExpenseListItemProps = {
+  expense: Expense,
+  checked: boolean,
+  expanded: boolean,
+  onToggleSelect: () => void,
+  onToggleExpand: () => void,
+  months: Category[],
+  editDraft: Expense | null,
+  onDraftChange: <K extends keyof Expense>(key: K, value: Expense[K]) => void,
+  onSaveEdit: () => void,
+  onCancelEdit: () => void,
+};
+
+function ExpenseListItem({
+  expense,
+  checked,
+  expanded,
+  onToggleSelect,
+  onToggleExpand,
+  months,
+  editDraft,
+  onDraftChange,
+  onSaveEdit,
+  onCancelEdit,
+}: ExpenseListItemProps) {
+
+  return (
+    <div className="expenseWrapper" key={expense.id ?? `${expense.title}-${expense.date.toISOString()}`}>
+      <div className="expenseDiv" onClick={onToggleExpand}>
+        <DotCheck checked={checked} onClick={onToggleSelect} />
+        <label className="titleExpense"> {expense.title} </label>
+        <label className="dateExpense"> {meses[expense.date.getMonth()]}, {expense.date.getDate()}  </label>
+        <label className="amountExpense">
+          <span className="amountPill">$ {expense.amount}</span>
+        </label>
+        <label className="arrowLabel">
+          <span className={expanded ? "arrowPill open" : "arrowPill"}> ▼ </span>
+        </label>
+      </div>
+
+      <div className={expanded ? "expenseDetail open" : "expenseDetail"}>
+        <div className="expenseDetailRow">
+          <span className="expenseDetailLabel">Categoría</span>
+          <span>{expense.category}</span>
+        </div>
+        <div className="expenseDetailRow">
+          <span className="expenseDetailLabel">Descripción</span>
+          <span>{expense.description}</span>
+        </div>
+        <div className="expenseDetailRow">
+          <span className="expenseDetailLabel">Monto</span>
+          <span className="amountPill">$ {expense.amount}</span>
+        </div>
+      </div>
+
+      {editDraft && (
+        <div className="expenseEdit">
+          <div className="expenseEditRow">
+            <span className="expenseDetailLabel">Título</span>
+            <input
+              className="searchInput expenseEditInput"
+              value={editDraft.title}
+              onChange={(event) => onDraftChange("title", event.target.value)}
+            />
+          </div>
+
+          <div className="expenseEditRow">
+            <span className="expenseDetailLabel">Categoría</span>
+            <input
+              className="searchInput expenseEditInput"
+              value={editDraft.category}
+              onChange={(event) => onDraftChange("category", event.target.value)}
+            />
+          </div>
+
+          <div className="expenseEditRow">
+            <span className="expenseDetailLabel">Descripción</span>
+            <input
+              className="searchInput expenseEditInput"
+              value={editDraft.description}
+              onChange={(event) => onDraftChange("description", event.target.value)}
+            />
+          </div>
+
+          <div className="expenseEditRow">
+            <span className="expenseDetailLabel">Fecha</span>
+            <div className="expenseEditDate">
+              <CustomSelect
+                options={months}
+                value={months.find((monthOption) => Number(monthOption.value) === editDraft.date.getMonth()) ?? null}
+                onChange={(selectedMonthOption) => {
+                  if (!selectedMonthOption) return;
+                  const nextDate = new Date(editDraft.date);
+                  nextDate.setMonth(Number(selectedMonthOption.value));
+                  onDraftChange("date", nextDate);
+                }}
+                enun="Mes"
+              />
+              <CustomSelect
+                options={Array.from({ length: new Date(editDraft.date.getFullYear(), editDraft.date.getMonth() + 1, 0).getDate() }, (_, index) => ({
+                  value: String(index + 1) + "_",
+                  label: String(index + 1)
+                }))}
+                value={Array.from({ length: new Date(editDraft.date.getFullYear(), editDraft.date.getMonth() + 1, 0).getDate() }, (_, index) => ({
+                  value: String(index + 1) + "_",
+                  label: String(index + 1)
+                })).find((dayOption) => Number(dayOption.label) === editDraft.date.getDate()) ?? null}
+                onChange={(selectedDayOption) => {
+                  if (!selectedDayOption) return;
+                  const nextDate = new Date(editDraft.date);
+                  nextDate.setDate(Number(selectedDayOption.label));
+                  onDraftChange("date", nextDate);
+                }}
+                enun="Dia"
+              />
+            </div>
+          </div>
+
+          <div className="expenseEditRow">
+            <span className="expenseDetailLabel">Monto</span>
+            <div className="expenseEditAmount">
+              <span className="amountPill">$</span>
+              <input
+                className="searchInput expenseEditInput moneyInput"
+                type="number"
+                value={editDraft.amount}
+                onChange={(event) => onDraftChange("amount", Number(event.target.value) || 0)}
+              />
+            </div>
+          </div>
+
+          <div className="expenseEditActions">
+            <button type="button" className="expenseEditButton save" onClick={onSaveEdit}>Guardar</button>
+            <button type="button" className="expenseEditButton cancel" onClick={onCancelEdit}>Cancelar</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+type expsHistoryProp = {
+  exps: Expense[],
+  setExps: (value: Expense[]) => void
+}
+
+function ExpenseHistory({exps, setExps}: expsHistoryProp) {
   const [queryTitle, setQueryTitle] = useState<string>("");
   const [selectedCatt, setSelectedCatt] = useState<Category | null>(null);
   const [selectedBool, setSelectedBool] = useState<boolean[]>(Array(2).fill(false));
@@ -839,7 +684,59 @@ function ExpenseHistory() {
 
   const categories = expenseCategories;
   const months = expenseMonths;
+  const [selectedMonths, setSelectedMonths] = useState<boolean[]>(Array(months.length).fill(false));
+  const [selectedExpensesByMonth, setSelectedExpensesByMonth] = useState<Record<number, boolean[]>>({});
+  const [expandedExpensesByMonth, setExpandedExpensesByMonth] = useState<Record<number, boolean[]>>({});
+  const [editIndexByMonth, setEditIndexByMonth] = useState<Record<number, number | null>>({});
+  const [editDraftByMonth, setEditDraftByMonth] = useState<Record<number, Expense | null>>({});
   const filters = expenseFilters;
+
+  const currentUserId = Number(localStorage.getItem("user") ?? -1);
+  const expensesByMonth = months.map((_, monthIndex) =>
+    exps.filter((expense) => expense.id_user === currentUserId && expense.date.getMonth() === monthIndex)
+  );
+
+  useEffect(() => {
+    setExps(exps);
+  }, [exps]);
+
+  const filteredExpensesByMonth = months.map((_, monthIndex) => {
+    const monthExpenses = expensesByMonth[monthIndex] ?? [];
+
+    const result = monthExpenses.filter((expense) => {
+      if (queryTitle !== "" && !expense.title.toLowerCase().startsWith(queryTitle.toLowerCase())) {
+        return false;
+      }
+
+      if (selectedBool[0] && selectedCat && expense.category !== selectedCat.label) {
+        return false;
+      }
+
+      if (selectedBool[1] && selectedMonth && selectedDay) {
+        const monthMatches = expense.date.getMonth() === Number(selectedMonth.value);
+        const dayMatches = expense.date.getDate() === Number(selectedDay.label);
+        if (!monthMatches || !dayMatches) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    if (selectedCatt?.value === "exp") {
+      return [...result].sort((a, b) => b.amount - a.amount);
+    }
+
+    if (selectedCatt?.value === "cheap") {
+      return [...result].sort((a, b) => a.amount - b.amount);
+    }
+
+    if (selectedCatt?.value === "alf") {
+      return [...result].sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    return result;
+  });
 
   useEffect(() => {
     const nextSelectedBool: boolean[] = Array(2).fill(false);
@@ -868,8 +765,121 @@ function ExpenseHistory() {
     setDaysMonth(newDaysMonth);
   }
 
-  function handleEditSelected() {
-    return;
+  function handleMonthSelected(index: number) {
+    const nextSelected = [...selectedMonths];
+    const isNowSelected = !nextSelected[index];
+    nextSelected[index] = isNowSelected;
+    setSelectedMonths(nextSelected);
+
+    const monthExpenses = expensesByMonth[index] ?? [];
+    setSelectedExpensesByMonth((prev) => ({
+      ...prev,
+      [index]: Array(monthExpenses.length).fill(isNowSelected),
+    }));
+  }
+
+  function handleExpenseSelected(monthIndex: number, expenseIndex: number) {
+    const currentSelection = selectedExpensesByMonth[monthIndex] ?? Array(expensesByMonth[monthIndex]?.length ?? 0).fill(false);
+    const nextSelection = [...currentSelection];
+    nextSelection[expenseIndex] = !nextSelection[expenseIndex];
+
+    setSelectedExpensesByMonth((prev) => ({
+      ...prev,
+      [monthIndex]: nextSelection,
+    }));
+  }
+
+  function handleExpenseExpand(monthIndex: number, expenseIndex: number) {
+    const currentExpanded = expandedExpensesByMonth[monthIndex] ?? Array(expensesByMonth[monthIndex]?.length ?? 0).fill(false);
+    const nextExpanded = [...currentExpanded];
+    nextExpanded[expenseIndex] = !nextExpanded[expenseIndex];
+
+    setExpandedExpensesByMonth((prev) => ({
+      ...prev,
+      [monthIndex]: nextExpanded,
+    }));
+  }
+
+  function handleExpenseEdit(monthIndex: number, expenseIndex: number) {
+    const expense = expensesByMonth[monthIndex]?.[expenseIndex];
+    if (!expense) return;
+
+    setEditIndexByMonth((prev) => ({
+      ...prev,
+      [monthIndex]: expenseIndex,
+    }));
+
+    setEditDraftByMonth((prev) => ({
+      ...prev,
+      [monthIndex]: { ...expense, date: new Date(expense.date) },
+    }));
+  }
+
+  function handleExpenseDelete(monthIndex: number, expenseIndex: number) {
+    console.log("Entre a borrar")
+    const expense = expensesByMonth[monthIndex]?.[expenseIndex];
+    
+    if (!expense) return;
+    deleteExpense(expense.id);
+    const updatedExpenses = exps.filter((item) => item.id !== expense.id);
+    setExps(updatedExpenses);
+  }
+
+  function handleDraftChange(monthIndex: number, key: keyof Expense, value: Expense[keyof Expense]) {
+    setEditDraftByMonth((prev) => {
+      const currentDraft = prev[monthIndex];
+      if (!currentDraft) return prev;
+
+      return {
+        ...prev,
+        [monthIndex]: {
+          ...currentDraft,
+          [key]: value,
+        },
+      };
+    });
+  }
+
+  function handleSaveEdit(monthIndex: number) {
+    const editingIndex = editIndexByMonth[monthIndex];
+    const draft = editDraftByMonth[monthIndex];
+
+    if (editingIndex === undefined || editingIndex === null || !draft) return;
+
+    const selectedExpense = expensesByMonth[monthIndex]?.[editingIndex];
+    if (!selectedExpense) return;
+
+    const expenseToUpdate = exps.find((expense) => expense.id === selectedExpense.id);
+    if (expenseToUpdate) {
+      Object.assign(expenseToUpdate, {
+        ...expenseToUpdate,
+        ...draft,
+        amount: Number(draft.amount),
+        date: new Date(draft.date),
+      });
+    }
+
+    setEditIndexByMonth((prev) => ({
+      ...prev,
+      [monthIndex]: null,
+    }));
+
+    setEditDraftByMonth((prev) => ({
+      ...prev,
+      [monthIndex]: null,
+    }));
+  }
+
+  function handleCancelEdit(monthIndex: number) {
+    setEditIndexByMonth((prev) => ({
+      ...prev,
+      [monthIndex]: null,
+    }));
+
+    setEditDraftByMonth((prev) => ({
+      ...prev,
+      [monthIndex]: null,
+    }));
   }
 
   return(
@@ -903,17 +913,97 @@ function ExpenseHistory() {
               categories={categories}
               daysMonth={daysMonth}
               filters={filters}
-              check={[]}
-              handleEditSelected={handleEditSelected}
+              check={selectedMonths}
             />
 
             <div className="historyMonthsSection">
               <div className="historyMonthsList">
-                {months.map((month) => (
-                  <div className="historyMonthItem" key={month.value}>
-                    <span>{month.label}</span>
-                  </div>
-                ))}
+                {months.map((month, index) => {
+                  const monthExpenses = filteredExpensesByMonth[index] ?? [];
+                  const monthSelectedExpenses = selectedExpensesByMonth[index] ?? Array(expensesByMonth[index]?.length ?? 0).fill(false);
+                  const monthExpanded = expandedExpensesByMonth[index] ?? Array(monthExpenses.length).fill(false);
+                  const monthEditingIndex = editIndexByMonth[index] ?? null;
+                  const monthEditDraft = editDraftByMonth[index] ?? null;
+                  const selectedExpenseIndex = monthExpenses.findIndex((_, expenseIndex) => monthSelectedExpenses[expenseIndex]);
+                  const hasExpenseSelection = selectedExpenseIndex >= 0 && !selectedMonths[index];
+
+                  return (
+                    <div key={month.value} className="historyMonthGroup">
+                      <div
+                        className="historyMonthItem historyMonthHeader"
+                        onClick={() => handleMonthSelected(index)}
+                      >
+                        <DotCheck checked={selectedMonths[index] ?? false} onClick={() => handleMonthSelected(index)} />
+                        <span className="historyMonthLabel">{month.label}</span>
+
+                        {selectedMonths[index] && (
+                          <div
+                            className="editDelContainer historyMonthActions"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            <img
+                              className="delImg"
+                              src='public\borrar.png'
+                              alt='Borrar mes'
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleExpenseDelete(index, selectedExpenseIndex);
+                              }}
+                            />
+                          </div>
+                        )}
+
+                        {!selectedMonths[index] && hasExpenseSelection && (
+                          <div
+                            className="editDelContainer historyMonthActions"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            <img
+                              className="delImg"
+                              src='public\editar.png'
+                              alt='Editar gasto'
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleExpenseEdit(index, selectedExpenseIndex);
+                              }}
+                            />
+                            <img
+                              className="delImg"
+                              src='public\borrar.png'
+                              alt='Borrar gasto'
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleExpenseDelete(index, selectedExpenseIndex);
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="historyMonthExpenses">
+                        {monthExpenses.length === 0 ? (
+                          <span className="exisLabel">Sin gastos</span>
+                        ) : (
+                          monthExpenses.map((expense, expenseIndex) => (
+                            <ExpenseListItem
+                              key={expense.id ?? `${expense.title}-${expense.date.toISOString()}`}
+                              expense={expense}
+                              checked={selectedMonths[index] || (monthSelectedExpenses[expenseIndex] ?? false)}
+                              expanded={monthExpanded[expenseIndex] ?? false}
+                              onToggleSelect={() => handleExpenseSelected(index, expenseIndex)}
+                              onToggleExpand={() => handleExpenseExpand(index, expenseIndex)}
+                              months={months}
+                              editDraft={monthEditingIndex === expenseIndex ? monthEditDraft : null}
+                              onDraftChange={(key, value) => handleDraftChange(index, key, value)}
+                              onSaveEdit={() => handleSaveEdit(index)}
+                              onCancelEdit={() => handleCancelEdit(index)}
+                            />
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -942,9 +1032,11 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, setOnSight, onS
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editDraft, setEditDraft] = useState<Expense | null>(null);
 
+  const userId = Number(localStorage.getItem("user") ?? -1);
+
   useEffect(() => {
-    setLocalExps(exps);
-  }, [exps]);
+    setLocalExps(expenses.filter((expense) => expense.id_user === userId));
+  }, [userId, exps]);
 
   useEffect(() => {
     const newSelectedBool: boolean[] = Array(2).fill(false);
@@ -1047,17 +1139,6 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, setOnSight, onS
     setIsSelectedExp(Array(localExps.length).fill(false));
   }, [localExps.length]);
 
-  function handleEditSelected() {
-    const selectedExpenseIndex = check.findIndex((isChecked) => isChecked);
-    if (selectedExpenseIndex === -1) return;
-
-    const selectedExpense = localExps[selectedExpenseIndex];
-    if (!selectedExpense) return;
-
-    setEditIndex(selectedExpenseIndex);
-    setEditDraft({ ...selectedExpense, date: new Date(selectedExpense.date) });
-  }
-
   function handleEditDraftChange<K extends keyof Expense>(key: K, value: Expense[K]) {
     setEditDraft((current) => {
       if (!current) return current;
@@ -1118,118 +1199,24 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, setOnSight, onS
     const actualIndex = expenseIndex >= 0 ? expenseIndex : i;
     const editingThisExpense = editIndex === actualIndex;
 
-    return(
-      <div className="expenseWrapper" key={e.id ?? `${e.title}-${actualIndex}`}>
-        <div className="expenseDiv" onClick={() => handleIsSelected(actualIndex)}>
-          <DotCheck value={check} onChange={setCheck} index={actualIndex}/>
-          <label className="titleExpense"> {e.title} </label>
-          <label className="dateExpense"> {meses[e.date.getMonth()]}, {e.date.getDate()}  </label>
-          <label className="amountExpense">
-            <span className="amountPill">$ {e.amount}</span>
-          </label>
-          <label className="arrowLabel"> 
-            <span className={isSelectedExp[actualIndex] ? "arrowPill open" : "arrowPill"}> ▼ </span>
-            </label>
-        </div>
-
-        <div className={isSelectedExp[actualIndex] ? "expenseDetail open" : "expenseDetail"}>
-          <div className="expenseDetailRow">
-            <span className="expenseDetailLabel">Categoría</span>
-            <span>{e.category}</span>
-          </div>
-          <div className="expenseDetailRow">
-            <span className="expenseDetailLabel">Descripción</span>
-            <span>{e.description}</span>
-          </div>
-          <div className="expenseDetailRow">
-            <span className="expenseDetailLabel">Monto</span>
-            <span className="amountPill">$ {e.amount}</span>
-          </div>
-        </div>
-
-        {editingThisExpense && editDraft && (
-          <div className="expenseEdit">
-            <div className="expenseEditRow">
-              <span className="expenseDetailLabel">Título</span>
-              <input
-                className="searchInput expenseEditInput"
-                value={editDraft.title}
-                onChange={(event) => handleEditDraftChange("title", event.target.value)}
-              />
-            </div>
-
-            <div className="expenseEditRow">
-              <span className="expenseDetailLabel">Categoría</span>
-              <input
-                className="searchInput expenseEditInput"
-                value={editDraft.category}
-                onChange={(event) => handleEditDraftChange("category", event.target.value)}
-              />
-            </div>
-
-            <div className="expenseEditRow">
-              <span className="expenseDetailLabel">Descripción</span>
-              <input
-                className="searchInput expenseEditInput"
-                value={editDraft.description}
-                onChange={(event) => handleEditDraftChange("description", event.target.value)}
-              />
-            </div>
-
-            <div className="expenseEditRow">
-              <span className="expenseDetailLabel">Fecha</span>
-              <div className="expenseEditDate">
-                <CustomSelect
-                  options={months}
-                  value={months.find((monthOption) => Number(monthOption.value) === editDraft.date.getMonth()) ?? null}
-                  onChange={(selectedMonthOption) => {
-                    if (!selectedMonthOption) return;
-                    const nextDate = new Date(editDraft.date);
-                    nextDate.setMonth(Number(selectedMonthOption.value));
-                    handleEditDraftChange("date", nextDate);
-                  }}
-                  enun="Mes"
-                />
-                <CustomSelect
-                  options={Array.from({ length: new Date(editDraft.date.getFullYear(), editDraft.date.getMonth() + 1, 0).getDate() }, (_, index) => ({
-                    value: String(index + 1) + "_",
-                    label: String(index + 1)
-                  }))}
-                  value={Array.from({ length: new Date(editDraft.date.getFullYear(), editDraft.date.getMonth() + 1, 0).getDate() }, (_, index) => ({
-                    value: String(index + 1) + "_",
-                    label: String(index + 1)
-                  })).find((dayOption) => Number(dayOption.label) === editDraft.date.getDate()) ?? null}
-                  onChange={(selectedDayOption) => {
-                    if (!selectedDayOption) return;
-                    const nextDate = new Date(editDraft.date);
-                    nextDate.setDate(Number(selectedDayOption.label));
-                    handleEditDraftChange("date", nextDate);
-                  }}
-                  enun="Dia"
-                />
-              </div>
-            </div>
-
-            <div className="expenseEditRow">
-              <span className="expenseDetailLabel">Monto</span>
-              <div className="expenseEditAmount">
-                <span className="amountPill">$</span>
-                <input
-                  className="searchInput expenseEditInput moneyInput"
-                  type="number"
-                  value={editDraft.amount}
-                  onChange={(event) => handleEditDraftChange("amount", Number(event.target.value) || 0)}
-                />
-              </div>
-            </div>
-
-            <div className="expenseEditActions">
-              <button type="button" className="expenseEditButton save" onClick={handleSaveEdit}>Guardar</button>
-              <button type="button" className="expenseEditButton cancel" onClick={handleCancelEdit}>Cancelar</button>
-            </div>
-          </div>
-        )}
-      </div>
+    return (
+      <ExpenseListItem
+        key={e.id ?? `${e.title}-${actualIndex}`}
+        expense={e}
+        checked={check[actualIndex] ?? false}
+        expanded={isSelectedExp[actualIndex] ?? false}
+        onToggleSelect={() => {
+          const newSelectedExp: boolean[] = Array(exps.length).fill(false);
+          newSelectedExp[actualIndex] = !check[actualIndex];
+          setCheck(newSelectedExp);
+        }}
+        onToggleExpand={() => handleIsSelected(actualIndex)}
+        months={months}
+        editDraft={editingThisExpense ? editDraft : null}
+        onDraftChange={handleEditDraftChange}
+        onSaveEdit={handleSaveEdit}
+        onCancelEdit={handleCancelEdit}
+      />
     );
   });
 
@@ -1270,7 +1257,6 @@ function ExpenseDate({dateSel, budRest, setBudRest, setSelected, setOnSight, onS
             daysMonth={daysMonth}
             filters={filters}
             check={check}
-            handleEditSelected={handleEditSelected}
           />
           {anyElement ? expss : <label className="exisLabel"> Enhorabuena, no hay gastos! </label>}
         </div>
@@ -1311,8 +1297,10 @@ function BudgetDate({onClickCal, setDisabledIn, budget, onMonthSelect, setDateSe
 
   const disabledMonth = meses.map((_, i) => i < fecha.getMonth());
 
+  const userExpenses = exps;
+
   function hasExpenseOnDay(monthIndex: number, dayNumber: number): boolean {
-    return exps.some((exp) => {
+    return userExpenses.some((exp) => {
       return exp.date.getFullYear() === fecha.getFullYear()
         && exp.date.getMonth() === monthIndex
         && exp.date.getDate() === dayNumber;
@@ -1648,174 +1636,4 @@ function BottomSideDash({hideStatus, onProfile}: statusHideProp) {
   );
 }
 
-//General functions
-function parsingPassword(password: string): boolean {
-
-  if (password.length < 8 || !/[A-Z]/.test(password)) {
-    return false;
-  }
-
-  return true;
-}
-
-function testName(name: string): boolean {
-   let nameTemp: string[] = name.split(" ");
-
-   if (nameTemp.length > 1) {
-    return true;
-   }
-
-   return false;
-}
-
-function verifyBudget(amount: string): boolean {
-  const number = Number(amount);
-  return !Number.isNaN(number) ? true : false; 
-}
-
-
-//CRUD functions
-function createUser(nameUser: string, emailUser: string, passwordUser: string) {
-  const user: User = {id: Date.now(), name: nameUser, email: emailUser, password: passwordUser, created_at: new Date().toISOString()};
-  accounts.push(user);
-}
-
-function getUserByID(id: number): User | null {
-
-  for (const account of accounts) {
-    if (id == account.id) {
-      return account;
-    }
-  }
-
-  return null;
-}
-
-function isPasswordCorrect(id: number, password: string): boolean {
-
-  for (const account of accounts) {
-    if (account.id == id) {
-      if (account.password == password) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-function modifyName(id: number, name: string): boolean {
-  for (let account of accounts) {
-    if (account.id == id) {
-      if (testName(name)) {
-        account.name = name;
-        return true;
-      } else {
-        return false
-      }
-    }
-  }
-
-  return false;
-}
-
-function modifyPass(id: number, password: string): boolean {
-  for (let account of accounts) {
-    if (account.id == id) {
-      if (parsingPassword(password)) {
-        account.password = password;
-        return true;
-      } else {
-        return false
-      }
-    }
-  }
-
-  return false;
-}
-
-function getBudgetsUser(id_user: number): Budget[] {
-  const budgetsUser: Budget[] = [];
-  for (const budgetUser of budgets) {
-    if (budgetUser.id_user == id_user) {
-      budgetsUser.push(budgetUser);
-    }
-  }
-
-  budgetsUser.sort((a, b) => a.month - b.month);
-  return budgetsUser;
-}
-
-function containsMonth(id_user: number, month: number): boolean {
-  for (const budget of budgets) {
-    if (budget.id_user == id_user) {
-      if (budget.month == month) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function getBudget(id_user: number, month: number): Budget {
-  
-  for (const budget of budgets) {
-    if (budget.id_user == id_user && budget.month == month) {
-      return budget;
-    }
-  }
-
-  return {id: -1, id_user: -1, amount: 0, month: 0, rest: 0};
-}
-
-function modifyBudget(id_user: number, month: number, amount: number): number {
-  for (const budget of budgets) {
-    if (budget.id_user == id_user) {
-      if (budget.month == month) {
-        
-        const difference: number = amount - budget.amount;
-        budget.amount = amount;
-        budget.rest += difference;
-        return budget.rest;
-      }
-    }
-  }
-
-  return 0;
-}
-
-function createBudget(id_user: number, amount: number, month: number, rest: number) {
-  const newBudget: Budget = {id: budgets.length + 1, id_user: id_user, amount: amount, month: month, rest: rest};
-  budgets.push(newBudget);
-  budgets.sort((a, b) => a.month - b.month);
-}
-
-function createExpense(id_user: number, title: string, amount: number, description: string, category: Category, date: Date): number {
-  const expense: Expense = {id: expenses.length + 1, id_user: id_user, title: title, amount: amount, category: (category?.label ?? "Error"), description: description
-      , date: date};
-
-    const newRest: number = differenceAmount(expense);
-
-  expenses.push(expense);
-  return newRest;
-}
-
-function sumAllExpenses(id_user: number, month: number): Expense[] {
-  const expense: Expense[] = expenses.filter((e) => e.id_user == id_user && e.date.getMonth() == month);
-  return expense;
-}
-
-function differenceAmount(expense: Expense): number {
-  
-  const budgetsUser: Budget[] = getBudgetsUser(expense.id_user);
-
-  for (let bud of budgetsUser) {
-    if (expense.date.getMonth() == bud.month) {
-      bud.rest -= expense.amount;
-      return bud.rest;
-    }
-  }
-
-  return -1;
-}
 export default App
