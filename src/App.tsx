@@ -48,6 +48,12 @@ function Dashboard() {
 
   const [selected, setSelected] = useState<boolean[]>(Array(4).fill(false));
 
+  useEffect(() => {
+    const newSelected = [...selected];
+    newSelected[0] = true;
+    setSelected(newSelected);
+  }, []);
+
 
   //BUDGET AND REST
   const id = localStorage.getItem("user");
