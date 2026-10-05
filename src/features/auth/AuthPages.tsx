@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { accounts, createUser } from '../../domain/store';
+import { login, signup } from '../../services/authService';
 import { parsingPassword, testName } from '../../utils/validation';
 
 type EmailProps = {
@@ -16,24 +16,7 @@ export function AuthLog({ testEmail }: EmailProps) {
   const [exist, setExist] = useState(false);
 
   function handleLogin() {
-    let foundAccount = false;
-    let correctPassword = false;
-    let id = 0;
-
-    if (testEmail(queryEmail)) {
-      for (const account of accounts) {
-        if (account.email === queryEmail) {
-          foundAccount = true;
-          if (account.password === queryPass) {
-            correctPassword = true;
-            id = account.id;
-          }
-        }
-      }
-    }
-
-    if (foundAccount && correctPassword) {
-      localStorage.setItem('user', String(id));
+    if (testEmail(queryEmail) && login(queryEmail, queryPass)) {
       setExist(true);
       navigate('/dashboard');
     } else {
@@ -100,7 +83,7 @@ export function AuthSign({ testEmail }: EmailProps) {
       return;
     }
 
-    createUser(queryName, queryEmail, queryPass);
+    signup(queryName, queryEmail, queryPass);
     navigate('/login');
     setValid(true);
     setCreated(true);

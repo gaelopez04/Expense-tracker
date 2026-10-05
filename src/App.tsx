@@ -317,6 +317,9 @@ function AddExpense({budRest, setBudRest, rest, setRest, exps, setExps, setAnyEl
 
   //Funcion a aniadir, para agreagr gastos ya
   function handleAdd() {
+    
+    if (queryTitle === '' && queryAmount == 0) return;
+
     const date: Date = new Date(fecha.getFullYear(), Number(selectedMonth?.value), Number(selectedDay?.label));
     const id = Number(localStorage.getItem("user"));
     const resTemp: number = createExpense(id,queryTitle, queryAmount ?? 0, queryDes, (selectedCategory ?? {value: "0", label: "Error"}), date);
@@ -1638,7 +1641,6 @@ function BottomSideDash({hideStatus, onProfile}: statusHideProp) {
         <img className="userIconHide" src="public\user_icon.png"/>
       </div>}
     </>
-    
   );
 }
 
